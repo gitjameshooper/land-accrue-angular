@@ -1,0 +1,10 @@
+@font-face {
+  font-family: "Futura PT";
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/FuturaPTHeavy.otf') format('opentype');
+}
+
+html, body{
+	background: #E5E5E5 !important;
+}

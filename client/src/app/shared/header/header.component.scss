@@ -1,0 +1,29 @@
+@import '../styles/vars.scss';
+
+
+:host {
+    text-align: center;
+    font: normal normal normal 65px/1.2em Georgia, palatino, 'book antiqua', 'palatino linotype', serif;
+
+    img {
+        width: 100%;
+        max-width: 575px;
+        margin-top: 20px;
+
+    }
+
+    h1 {
+        color: #0EA2CC;
+        font-size: 66px;
+        letter-spacing: .2em;
+        line-height: 1;
+    }
+
+    p {
+        color: #646464;
+        letter-spacing: .2em;
+        font-size: 23px;
+        line-height: 1;
+    }
+
+}

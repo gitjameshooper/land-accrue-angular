@@ -1,0 +1,53 @@
+<section class="container-fluid" *ngIf="land$ | async as lands">
+    <div class="row">
+        <div class="col">
+            <table class="table table-bordered table-responsive text-center header-fixed">
+                <thead>
+                    <tr>
+                        <th class="small-width">#</th>
+                        <th class="large-width">Owner Name</th>
+                        <th class="large-width">Address</th>
+                        <th class="medium-width">Lot Acreage</th>
+                        <th class="medium-width">Avg. PPA</th>
+                        <th class="medium-width">Flood Zone</th>
+                        <th class="medium-width">Sold Price</th>
+                        <th class="medium-width">EST. Value</th>
+                        <!-- <th class="medium-width">Offer PPA</th> -->
+                            <th class="medium-width">APP <br />Offer1</th>
+                        <th class="medium-width">APP <br />Offer2</th>
+                        <th class="medium-width">Jason <br />Offer</th>
+                    </tr>
+                </thead>
+                <div class="scroll-div">
+                    <tbody *ngFor="let land of lands  let i = index">
+                        <tr class="buy-row">
+                            <td class="small-width">{{ i + 1 }} </td>
+                            <td class="large-width">{{ land['OWNER MAILING NAME'] }}</td>
+                            <td class="large-width">{{ land['SITUS FULL ADDRESS'] }}</td>
+                            <td class="medium-width">{{ land['LOT ACREAGE'] | number:'.2' }}</td>
+                            <td class="medium-width">${{ land['avgPPA'] | number:'.0' }}</td>
+                            <td class="medium-width">{{ land['IN FLOOD ZONE'] }}</td>
+                            <td class="medium-width"></td>
+                            <td class="medium-width">${{ land['EST VALUE'] | number }}</td>
+                            <td class="medium-width">${{ land['OFFER'] | number }}</td>
+                            <td class="medium-width">${{ land['OFFER2'] | number }}</td>
+                            <td class="medium-width">${{ land['JASON OFFER'] | number }}</td>
+                        </tr>
+                        <tr *ngFor="let mile of land['soldArr'] | sort: 'PRICE PER ACRE': 'desc'; let i = index">
+                            <td class="small-width"> </td>
+                            <td class="large-width">{{ i + 1 }} - SOLD(5 mi)</td>
+                            <td class="large-width"> {{ mile['ADDRESS']+' '+mile['CITY']+', '+mile['STATE']+' '+mile['ZIP'] }}</td>
+                            <td class="medium-width"> {{ mile['LOT ACREAGE'] | number:'.2'}}</td>
+                            <td class="medium-width">${{ mile['PRICE PER ACRE'] | number:'.0' }}</td>
+                            <td class="medium-width"></td>
+                            <td class="medium-width">${{ mile['SOLD PRICE'] | number }}</td>
+                            <td class="medium-width"></td>
+                            <td class="medium-width"></td>
+                            <td class="medium-width"></td>
+                        </tr>
+                    </tbody>
+                </div>
+            </table>
+        </div>
+    </div>
+</section>

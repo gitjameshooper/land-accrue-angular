@@ -1,0 +1,7 @@
+@import 'shared/styles/vars.scss';
+
+
+:host {
+    font-family: "Futura PT";
+    button:focus {outline:0;}
+}
