@@ -1,23 +1,17 @@
--Keep "MARKET TOTAL VALUE"  and remove the other assessed values
--Use letter in the email to make sure the correct key values are being filtered
--Check with Jason that the correct address/info for auto-generated mailings is the same
 -Mile clustering looks to be working.... Error: Figure out why mile data is not 100% accurate
- -Add in correct mile in parthenses 
 -Figure out how to merge/remove duplicate properties with the same owner. only going to mail the owner 1 mailing even if they have multiple properties
 
- "MARKET TOTAL VALUE": "$33,790.00",  50% markup vs estimated value
- -Make  property address a link to a google map
- -Make comp address a link to the redfin.
- -Put a Flood Zone flag with 50% mark down , remove column
+ FLAG -> "MARKET TOTAL VALUE": "$33,790.00",  50% markup vs estimated value
 
  -Make 3 Estimated Values off comps. ( 1 by the top 3 closests properties)
- (1 by the middle of the 5 properties)
+ (1 by the middle 3 of the 5 properties based on Avg. PPA)
  (1 by the middle of the 5 properties)
  with offers that are 50% in parentheses
 
  -Create grayed out section for items not to be included in the final csv
-
- -Figure out how to make state with 
+-Create 3 tier colors.   red green, yellow that filter when a price needs to be entered
+-Sort properties by estimated value
+ -Figure out how to make state with app
 -Upload app to jameshooper.site/land-accrue
 -Generate CSV button
  -Generate CSV for Jason
