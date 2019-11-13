@@ -41,16 +41,19 @@ function formatBuyData(csv) {
         let marketValueArr = o['MARKET TOTAL VALUE'].replace('$','').replace(',','').split('.');
       orderArr.push({
       	'SITUS FULL ADDRESS': o['SITUS FULL ADDRESS'].trim(),
+        'SITUS CITY': o['SITUS CITY'].trim(),
+        'ALTERNATE APN': o['ALTERNATE APN'].replace('\"','').replace('\"','').replace('=',''),
       	'COUNTY': o['COUNTY'],
       	'LOT AREA': Number(o['LOT AREA']),
         'LOT ACREAGE': Number(o['LOT ACREAGE']),
         'LATITUDE': o['LATITUDE'],
         'LONGITUDE': o['LONGITUDE'],
         'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
-      	'OWNER 1 FIRST NAME': o['OWNER 1 FIRST NAME'],
-      	'OWNER 1 LAST NAME': o['OWNER 1 LAST NAME'],
         'OWNER MAILING NAME': o['OWNER MAILING NAME'],
-        'MAILING FULL ADDRESS': o['MAILING FULL ADDRESS'].trim(),
+        'MAILING STREET ADDRESS': o['MAILING STREET ADDRESS'].trim(),
+        'MAIL CITY': o['MAIL CITY'].trim(),
+        'MAIL STATE': o['MAIL STATE'].trim(),
+        'MAIL ZIPZIP4': o['MAIL ZIP/ZIP+4'].replace('\"','').replace('\"','').replace('=',''),
     		'MARKET TOTAL VALUE': Number(marketValueArr[0]),
     		'EST VALUE': 0,
     		'OFFER': 0,
@@ -140,7 +143,7 @@ function mergeD(buyData, soldData, offerData){
 
 
              if(soldArr.length < 5 && d < v+1 && d > v && minAcre < soldData[sk]['LOT ACREAGE'] && maxAcre > soldData[sk]['LOT ACREAGE']){
-               soldData[sk]['distance'] = d;
+               soldData[sk]['distance'] = Math.round(d * 100) / 100
                totalPricePerAcreM1 += soldData[sk]['PRICE PER ACRE'];
                pricePerAcreArr.push(soldData[sk]['PRICE PER ACRE']);
                soldArr.push(soldData[sk]);
@@ -153,10 +156,10 @@ function mergeD(buyData, soldData, offerData){
        
        buyData[bk]['avgPPA'] = ppArr.length > 0 ? Math.round(_.sum(ppArr) / ppArr.length) : 0;
        buyData[bk]['avgPPA2'] = totalPricePerAcreM1 > 0 ? Math.round(totalPricePerAcreM1 / soldArr.length) : 0;
-       // Flood Zone TRUE-> discount 15%
+       // Flood Zone TRUE-> discount 50%
        if(buyData[bk]['IN FLOOD ZONE']){
-          buyData[bk]['avgPPA'] *=  .80;
-          buyData[bk]['avgPPA2'] *= .80;
+          buyData[bk]['avgPPA'] *=  .50;
+          buyData[bk]['avgPPA2'] *= .50;
        }
      
        buyData[bk]['EST VALUE'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);

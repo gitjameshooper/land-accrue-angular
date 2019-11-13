@@ -2,41 +2,6 @@
 
 :host {
 
-    // .header-fixed {
-    //     width: 100%
-    // }
-
-    // .header-fixed>thead,
-    // .header-fixed>tbody,
-    // .header-fixed>thead>tr,
-    // .header-fixed>tbody>tr,
-    // .header-fixed>thead>tr>th,
-    // .header-fixed>tbody>tr>td {
-    //     display: block;
-    // }
-
-    // .header-fixed>tbody>tr:after,
-    // .header-fixed>thead>tr:after {
-    //     content: ' ';
-    //     display: block;
-    //     visibility: hidden;
-    //     clear: both;
-    // }
-
-    // .header-fixed>tbody {
-    //     overflow-y: auto;
-    //     height: 550px;
-    // }
-
-    // .header-fixed>tbody>tr>td,
-    // .header-fixed>thead>tr>th {
-    //     width: 9.5%;
-    //     float: left;
-    //     &.smallie{
-    //     	width: 5%;
-    //     }
-    // }
-
     table {
         width: 100%;
     }
@@ -61,9 +26,11 @@
 
         /*text-align: left;*/
     }
-    .red{
-    	color: red;
+
+    .red {
+        color: red;
     }
+
     .scroll-div {
         height: 720px;
         overflow-y: auto;
@@ -99,14 +66,55 @@
 
     }
 
-    tr td {
-        text-transform: uppercase;
+    tr {
+        td {
+            text-transform: uppercase;
+
+
+
+        }
+
+        a {
+            color: #333;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        &.buy-row {
+            position: relative;
+            background: #333;
+            color: #f1f1f1;
+            border-bottom: 3px solid #0EA2CC;
+
+            .triangle-bottomleft {
+                width: 0;
+                height: 0;
+                border-bottom: 40px solid red;
+                border-right: 50px solid transparent;
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                z-index: 1;
+
+
+            }
+
+            .fa-water {
+                position: absolute;
+                bottom: 4px;
+                left: 4px;
+                z-index: 2;
+            }
+
+            a {
+                color: #f1f1f1;
+            }
+        }
+
+
     }
 
-    .buy-row {
-        background: #333;
-        color: #f1f1f1;
-        border-bottom: 3px solid #0EA2CC;
-    }
 
 }
