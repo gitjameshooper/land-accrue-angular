@@ -2,6 +2,70 @@
 
 :host {
 
+
+    .checkbox-container {
+        display: inline-block;
+        position: relative;
+
+        label {
+            background-color: $gray;
+            border: 1px solid #fff;
+            border-radius: 20px;
+            display: inline-block;
+            position: relative;
+            transition: all 0.3s ease-out;
+            width: 45px;
+            height: 25px;
+            z-index: 2;
+
+            &::after {
+                content: ' ';
+                background-color: $white;
+                border-radius: 50%;
+                position: absolute;
+                top: 1.5px;
+                left: 1px;
+                transform: translateX(0);
+                transition: transform 0.3s linear;
+                width: 20px;
+                height: 20px;
+                z-index: 3;
+            }
+        }
+
+        input {
+            visibility: hidden;
+            position: absolute;
+            z-index: 2;
+        }
+
+        input:checked+label+.active-circle {
+            transform: translate(-50%, -50%) scale(15);
+        }
+
+        input:checked+label::after {
+            transform: translateX(calc(100% + 0.5px));
+        }
+
+        &.green input:checked+label {
+            background-color: $green;
+        }
+
+        &.yellow input:checked+label {
+            background-color: $yellow;
+        }
+
+        &.red input:checked+label {
+            background-color: $red;
+        }
+    }
+
+
+
+
+
+
+
     table {
         width: 100%;
     }
@@ -21,14 +85,10 @@
         clear: both;
     }
 
-    thead th {
-        // height: 30px;
 
-        /*text-align: left;*/
-    }
 
     .red {
-        color: red;
+        color: $red;
     }
 
     .scroll-div {
@@ -37,8 +97,8 @@
     }
 
     thead {
-        border-bottom: 3px solid #333;
-        box-shadow: 0px 0px 10px #333;
+        border-bottom: 3px solid $black-2;
+        box-shadow: 0px 0px 10px $black-2;
     }
 
 
@@ -75,7 +135,7 @@
         }
 
         a {
-            color: #333;
+            color: $black-2;
 
             &:hover {
                 text-decoration: underline;
@@ -84,14 +144,25 @@
 
         &.buy-row {
             position: relative;
-            background: #333;
-            color: #f1f1f1;
-            border-bottom: 3px solid #0EA2CC;
+            background: $black-2;
+            color: $white;
+
+            &.yellow {
+                border-bottom: 5px solid $yellow;
+            }
+
+            &.green {
+                border-bottom: 5px solid $green;
+            }
+
+            &.red {
+                border-bottom: 5px solid $red;
+            }
 
             .triangle-bottomleft {
                 width: 0;
                 height: 0;
-                border-bottom: 40px solid red;
+                border-bottom: 40px solid $red;
                 border-right: 50px solid transparent;
                 position: absolute;
                 left: 0;
@@ -109,7 +180,7 @@
             }
 
             a {
-                color: #f1f1f1;
+                color: $white;
             }
         }
 

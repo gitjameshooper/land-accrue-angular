@@ -13,12 +13,17 @@ import { LandService } from '../shared/services/land.service';
 })
 export class LandComponent implements OnInit{
   public land$: Observable<Array<any>> = new Observable;
+  public statusColorArr = [{ color: 'red', status: true},{ color:'green', status: true},{ color:'yellow', status: true}];
  
  
   constructor(private landService: LandService, private sortPipe:ArraySortPipe){
   }
- public ngOnInit() {
-   	this.land$ = this.landService.getLandData();
-   	 }
-  
+ 	public ngOnInit() {
+   		this.land$ = this.landService.getLandData();
+  	}
+
+   public toggleStatusColor(event) {
+   	let i = this.statusColorArr.findIndex(obj => obj.color == event.target.value);
+   	    this.statusColorArr[i].status = event.target.checked ? true: false;
+   }
 }

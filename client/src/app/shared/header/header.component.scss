@@ -5,6 +5,25 @@
     text-align: center;
     font: normal normal normal 65px/1.2em Georgia, palatino, 'book antiqua', 'palatino linotype', serif;
 
+    .download-btn {
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 20px;
+        line-height: 1;
+        color: $white;
+        background: $blue;
+        border: 2px solid #333;
+        border-radius: 5px;
+        padding: 10px 15px;
+        outline: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     img {
         width: 100%;
         max-width: 575px;
@@ -13,14 +32,14 @@
     }
 
     h1 {
-        color: #0EA2CC;
+        color: $blue;
         font-size: 66px;
         letter-spacing: .2em;
         line-height: 1;
     }
 
     p {
-        color: #646464;
+        color: $gray;
         letter-spacing: .2em;
         font-size: 23px;
         line-height: 1;

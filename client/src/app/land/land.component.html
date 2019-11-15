@@ -1,7 +1,23 @@
 <section class="container-fluid" *ngIf="land$ | async as lands">
     <div class="row">
+        <div class="col toggle-settings">
+            <div class="checkbox-container green">
+                <input type="checkbox" id="greenToggle" checked="true" value="green" (change)="toggleStatusColor($event)" name="status-green" />
+                <label for="greenToggle"></label>
+            </div>
+            <div class="checkbox-container yellow">
+                <input type="checkbox" id="yellowToggle" checked="true" value="yellow" (change)="toggleStatusColor($event)" name="status-yellow" />
+                <label for="yellowToggle"></label>
+            </div>
+            <div class="checkbox-container red">
+                <input type="checkbox" id="redToggle" checked="true" value="red" (change)="toggleStatusColor($event)" name="status-red" />
+                <label for="redToggle"></label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col">
-            <table class="table table-bordered table-responsive text-center header-fixed">
+            <table class="table table-bordered table-responsive text-center">
                 <thead>
                     <tr>
                         <th class="small-width">#</th>
@@ -19,36 +35,40 @@
                     </tr>
                 </thead>
                 <div class="scroll-div">
-                    <tbody *ngFor="let land of lands  let i = index">
-                        <tr class="buy-row">
-                            <td class="small-width">{{ i + 1 }} <br />
-                                <div *ngIf="land['IN FLOOD ZONE']" class="flood-zone">
-                                    <span class="triangle-bottomleft"></span>
-                                    <i class="fas fa-water"></i></div>
-                            </td>
-                            <td class="large-width">{{ land['OWNER MAILING NAME'] }}</td>
-                            <td class="large-width"><a target="_blank" href="https://www.google.com/maps/place/{{land['SITUS FULL ADDRESS']}}">{{ land['SITUS FULL ADDRESS'] }}</a></td>
-                            <td class="medium-width">{{ land['LOT ACREAGE'] | number:'.2' }}</td>
-                            <td class="medium-width">${{ land['avgPPA'] | number }}</td>
-                            <td class="medium-width"></td>
-                            <td class="medium-width">${{ land['EST VALUE'] | number }}</td>
-                            <td class="medium-width">${{ land['EST VALUE2'] | number }}</td>
-                            <td class="medium-width">${{ land['OFFER'] | number }}</td>
-                            <td class="medium-width">${{ land['OFFER2'] | number }}</td>
-                            <td class="medium-width">${{ land['JASON OFFER'] | number }}</td>
-                        </tr>
-                        <tr *ngFor="let mile of land['soldArr'] | sort: 'PRICE PER ACRE': 'desc'; let i = index">
-                            <td class="small-width"> </td>
-                            <td class="large-width">{{ i + 1 }} - SOLD ({{mile['distance']}} mi)</td>
-                            <td class="large-width"><a target="_blank" href="{{mile['URL']}}">{{ mile['ADDRESS']+' '+mile['CITY']+', '+mile['STATE']+' '+mile['ZIP'] }}</a></td>
-                            <td class="medium-width"> {{ mile['LOT ACREAGE'] | number:'.2'}}</td>
-                            <td class="medium-width">${{ mile['PRICE PER ACRE'] | number:'.0' }}</td>
-                            <td class="medium-width">${{ mile['SOLD PRICE'] | number }}</td>
-                            <td class="medium-width"></td>
-                            <td class="medium-width"></td>
-                            <td class="medium-width"></td>
-                            <td class="medium-width"></td>
-                        </tr>
+                    <tbody *ngFor="let land of lands  let iLand = index">
+                        <div *ngFor="let s of statusColorArr let iStatus =index">
+                            <div *ngIf="statusColorArr[iStatus].color === land['statusColor'] && statusColorArr[iStatus].status">
+                                <tr class="buy-row {{land['statusColor']}}">
+                                    <td class="small-width">{{ iLand + 1 }} <br />
+                                        <div *ngIf="land['IN FLOOD ZONE']" class="flood-zone">
+                                            <span class="triangle-bottomleft"></span>
+                                            <i class="fas fa-water"></i></div>
+                                    </td>
+                                    <td class="large-width">{{ land['OWNER MAILING NAME'] }}</td>
+                                    <td class="large-width"><a target="_blank" href="https://www.google.com/maps/place/{{land['SITUS FULL ADDRESS']}}">{{ land['SITUS FULL ADDRESS'] }}</a></td>
+                                    <td class="medium-width">{{ land['LOT ACREAGE'] | number:'.2' }}</td>
+                                    <td class="medium-width">${{ land['avgPPA'] | number }}</td>
+                                    <td class="medium-width"></td>
+                                    <td class="medium-width">${{ land['EST VALUE'] | number }}</td>
+                                    <td class="medium-width">${{ land['EST VALUE2'] | number }}</td>
+                                    <td class="medium-width">${{ land['OFFER'] | number }}</td>
+                                    <td class="medium-width">${{ land['OFFER2'] | number }}</td>
+                                    <td class="medium-width">${{ land['JASON OFFER'] | number }}</td>
+                                </tr>
+                                <tr *ngFor="let mile of land['soldArr'] | sort: 'PRICE PER ACRE': 'desc'; let i = index">
+                                    <td class="small-width"> </td>
+                                    <td class="large-width">{{ i + 1 }} - SOLD ({{mile['distance']}} mi)</td>
+                                    <td class="large-width"><a target="_blank" href="{{mile['URL']}}">{{ mile['ADDRESS']+' '+mile['CITY']+', '+mile['STATE']+' '+mile['ZIP'] }}</a></td>
+                                    <td class="medium-width"> {{ mile['LOT ACREAGE'] | number:'.2'}}</td>
+                                    <td class="medium-width">${{ mile['PRICE PER ACRE'] | number:'.0' }}</td>
+                                    <td class="medium-width">${{ mile['SOLD PRICE'] | number }}</td>
+                                    <td class="medium-width"></td>
+                                    <td class="medium-width"></td>
+                                    <td class="medium-width"></td>
+                                    <td class="medium-width"></td>
+                                </tr>
+                            </div>
+                        </div>
                     </tbody>
                 </div>
             </table>
