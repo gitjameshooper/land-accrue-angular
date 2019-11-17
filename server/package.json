@@ -1,0 +1,21 @@
+{
+  "name": "server-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "method-override": "^3.0.0",
+    "nodemon": "^1.19.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-watch": "nodemon server.js",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

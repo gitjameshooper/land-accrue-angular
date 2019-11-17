@@ -224,6 +224,7 @@ function mergeData(buyData, soldData, offerData) {
     // Removes Duplicate Mailing addresses filteredBuyData : buyData
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');  
     createJSONFile(filteredBuyData, 'total');
+    createJSONFile(filteredBuyData, 'total-editable');
 
 }
 
