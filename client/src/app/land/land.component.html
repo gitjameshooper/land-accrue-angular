@@ -46,7 +46,7 @@
                                     <td class="large-width">{{ land['OWNER MAILING NAME'] }}</td>
                                     <td class="large-width"><a target="_blank" href="https://www.google.com/maps/place/{{land['SITUS FULL ADDRESS']}}">{{ land['SITUS FULL ADDRESS'] }}</a></td>
                                     <td class="medium-width">{{ land['LOT ACREAGE'] | number:'.2' }}</td>
-                                    <td class="medium-width">${{ land['avgPPA'] | number }}</td>
+                                    <td class="medium-width"></td>
                                     <td class="medium-width">
                                         <div *ngIf="land['marketValueFlag']" class="market-value-flag red">
                                             ${{ land['MARKET TOTAL VALUE'] | number }}

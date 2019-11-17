@@ -1,3 +1,4 @@
+ 1:-Solve distance Bug...
  3:-Make 3 Estimated Values off comps. 
  (1 by the top 3 closests properties)
  (1 by the middle 3 of the 5 properties based on Avg. PPA)
