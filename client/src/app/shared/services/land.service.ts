@@ -13,7 +13,7 @@ export class LandService {
 
   // Get Land Data
   public getLandData(): Observable<any> {
-      return this.http.get('assets/json/total.json') 
+      return this.http.get('assets/json/total-sample.json') 
         .pipe(
             tap(data => data), 
             catchError(err => {return Observable.throw(err);})

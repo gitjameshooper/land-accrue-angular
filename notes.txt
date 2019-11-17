@@ -1,17 +1,24 @@
--Mile clustering looks to be working.... Error: Figure out why mile data is not 100% accurate
--Figure out how to merge/remove duplicate properties with the same owner. only going to mail the owner 1 mailing even if they have multiple properties
-
- FLAG -> "MARKET TOTAL VALUE": "$33,790.00",  50% markup vs estimated value
-
- -Make 3 Estimated Values off comps. ( 1 by the top 3 closests properties)
+ 3:-Make 3 Estimated Values off comps. 
+ (1 by the top 3 closests properties)
  (1 by the middle 3 of the 5 properties based on Avg. PPA)
- (1 by the middle of the 5 properties)
+ (1 by the Avg. PPA of all 5 properties)
  with offers that are 50% in parentheses
 
- -Create grayed out section for items not to be included in the final csv
--Create 3 tier colors.   red green, yellow that filter when a price needs to be entered
--Sort properties by estimated value
- -Figure out how to make state with app
--Upload app to jameshooper.site/land-accrue
--Generate CSV button
- -Generate CSV for Jason
+4:-Create grayed out section for items not to be included in the final csv
+Figure out how to make state with app updating json object for final csv create editable JSON object then merge that with the final at the end?
+
+5:-Make pagination or improve lazy loading of items
+6:-Generate final CSV for Jason using button
+7:-Upload app to production at jameshooper.site/land-accrue
+
+
+Completed Items:
+-Added links to google maps and redfin
+-Sorted buy properties by estimated value 1
+-Sorted sold properties by distance
+-Remove duplicate buy properties by same mailing address of owner and picking the property with the most sold comps.
+-Created sorting with 3 colors: Red for needs offer, Yellow for needs review, Green for good to go
+Based off sold comps.
+-Added Flood Flag
+-Added Total Market Value Flag if above 50% from estimated value
+-Reorganized the table with data values

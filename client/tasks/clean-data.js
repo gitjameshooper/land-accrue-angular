@@ -55,8 +55,20 @@ function formatBuyData(csv) {
             'MAIL STATE': o['MAIL STATE'].trim(),
             'MAIL ZIPZIP4': o['MAIL ZIP/ZIP+4'].replace('\"', '').replace('\"', '').replace('=', ''),
             'MARKET TOTAL VALUE': Number(marketValueArr[0]),
-            'EST VALUE': 0,
-            'OFFER': 0,
+            'id': 0,
+            'avgPPA': 0,
+            'avgPPA2': 0,
+            'estValue': 0,
+            'estValue2': 0,
+            'estValue3': 0,
+            'offer': 0,
+            'offer2': 0,
+            'offer3': 0,
+            'offerPPA': 0,
+            'jasonOffer': 0,
+            'jasonEstValue': 0,
+            'statusColor': '',
+            'marketValueFlag': false,
         })
 
 
@@ -73,8 +85,8 @@ function formatOfferData(csv) {
         let offer = o[' Offer '].replace('$', '').replace(',', '').split('.');
         orderArr.push({
             'SITUS FULL ADDRESS': o['SITUS FULL ADDRESS'].trim(),
-            'JASON EST VALUE': Number(o['est value']),
-            'JASON OFFER': Number(offer[0]),
+            'jasonEstValue': Number(o['est value']),
+            'jasonOffer': Number(offer[0]),
         })
 
 
@@ -87,11 +99,11 @@ function distance(lat1, lon1, lat2, lon2, unit) {
     if ((lat1 == lat2) && (lon1 == lon2)) {
         return 0;
     } else {
-        var radlat1 = Math.PI * lat1 / 180;
-        var radlat2 = Math.PI * lat2 / 180;
-        var theta = lon1 - lon2;
-        var radtheta = Math.PI * theta / 180;
-        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        let radlat1 = Math.PI * lat1 / 180;
+        let radlat2 = Math.PI * lat2 / 180;
+        let theta = lon1 - lon2;
+        let radtheta = Math.PI * theta / 180;
+        let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
         if (dist > 1) {
             dist = 1;
         }
@@ -104,9 +116,9 @@ function distance(lat1, lon1, lat2, lon2, unit) {
     }
 }
 
-function mergeD(buyData, soldData, offerData) {
-
-
+function mergeData(buyData, soldData, offerData) {
+    let dupArr = [],
+       uniqueId = 1;
     _.forEach(buyData, (bv, bk) => {
         let soldArr = [],
             ppArr = [],
@@ -114,6 +126,8 @@ function mergeD(buyData, soldData, offerData) {
             totalPricePerAcreM1 = 0,
             totalPricePerAcreM2 = 0,
             offerObj = _.find(offerData, { 'SITUS FULL ADDRESS': buyData[bk]['SITUS FULL ADDRESS'] });
+        buyData[bk]['id'] = uniqueId++;
+        // 8 miles radius from buy property - Loops through each mile adding to the sold array
         _.forEach([0, 1, 2, 3, 4, 5, 6, 7, 8], (v, k) => {
             _.forEach(soldData, (sv, sk) => {
                 let d = distance(bv['LATITUDE'], bv['LONGITUDE'], sv['LATITUDE'], sv['LONGITUDE'], 'M'),
@@ -131,6 +145,7 @@ function mergeD(buyData, soldData, offerData) {
                 } else if (buyData[bk]['LOT ACREAGE'] > 3) {
                     minAcre = buyData[bk]['LOT ACREAGE'] - 1;
                     maxAcre = buyData[bk]['LOT ACREAGE'] + 1;
+
                 } else if (buyData[bk]['LOT ACREAGE'] > .50) {
                     minAcre = buyData[bk]['LOT ACREAGE'] - .50;
                     maxAcre = buyData[bk]['LOT ACREAGE'] + .50;
@@ -138,9 +153,8 @@ function mergeD(buyData, soldData, offerData) {
                     minAcre = buyData[bk]['LOT ACREAGE'] - .25;
                     maxAcre = buyData[bk]['LOT ACREAGE'] + .25;
                 }
-                // Less than 1 miles away and close to the same lot size
 
-
+                // Less than 5 sold properties on array and Less than (d) miles away and close to the same lot acreage
                 if (soldArr.length < 5 && d < v + 1 && d > v && minAcre < soldData[sk]['LOT ACREAGE'] && maxAcre > soldData[sk]['LOT ACREAGE']) {
                     soldData[sk]['distance'] = Math.round(d * 100) / 100
                     totalPricePerAcreM1 += soldData[sk]['PRICE PER ACRE'];
@@ -161,15 +175,17 @@ function mergeD(buyData, soldData, offerData) {
             buyData[bk]['avgPPA2'] *= .50;
         }
 
-        buyData[bk]['EST VALUE'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);
-        buyData[bk]['EST VALUE2'] = Math.round(buyData[bk]['avgPPA2'] * buyData[bk]['LOT ACREAGE'])
-        // buyData[bk]['OFFER'] = Math.round(buyData[bk]['EST VALUE'] * .50); 
-        buyData[bk]['OFFER'] = Math.floor((buyData[bk]['EST VALUE'] * .50) / 100) * 100;
-        buyData[bk]['OFFER2'] = Math.floor((buyData[bk]['EST VALUE2'] * .50) / 100) * 100;
-        buyData[bk]['OFFER PPA'] = Math.round(buyData[bk]['OFFER'] / buyData[bk]['LOT ACREAGE']);
-        buyData[bk]['JASON OFFER'] = offerObj ? offerObj['JASON OFFER'] : 0;
-        buyData[bk]['JASON EST VALUE'] = offerObj ? offerObj['JASON EST VALUE'] : 0;
-        
+        // Calculates Estimated Values and Offers
+        buyData[bk]['estValue'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);
+        buyData[bk]['estValue2'] = Math.round(buyData[bk]['avgPPA2'] * buyData[bk]['LOT ACREAGE'])
+        buyData[bk]['estValue3'] = Math.round(buyData[bk]['avgPPA3'] * buyData[bk]['LOT ACREAGE'])
+        buyData[bk]['offer'] = Math.floor((buyData[bk]['estValue'] * .50) / 100) * 100;
+        buyData[bk]['offer2'] = Math.floor((buyData[bk]['estValue2'] * .50) / 100) * 100;
+        buyData[bk]['offer3'] = Math.floor((buyData[bk]['estValue3'] * .50) / 100) * 100;
+        buyData[bk]['offerPPA'] = Math.round(buyData[bk]['offer'] / buyData[bk]['LOT ACREAGE']);
+        buyData[bk]['jasonOffer'] = offerObj ? offerObj['jasonOffer'] : 0;
+        buyData[bk]['jasonEstValue'] = offerObj ? offerObj['jasonEstValue'] : 0;
+
 
         // Add status color based off the amount of sold propeties
         if (soldArr.length > 3) {
@@ -180,23 +196,45 @@ function mergeD(buyData, soldData, offerData) {
             buyData[bk]['statusColor'] = 'red';
         }
 
+        // MARKET TOTAL VALUE vs Estimated Value
+        buyData[bk]['marketValueFlag'] = (buyData[bk]['statusColor'] !== 'red') && (buyData[bk]['MARKET TOTAL VALUE'] / buyData[bk]['estValue']) > 2 ? true : false;
+
+        if (buyData[bk]['marketValueFlag']) {
+            buyData[bk]['statusColor'] = 'red';
+        }
 
         buyData[bk]['soldArr'] = soldArr;
+        
+        // Remove Duplicates: Choose from the most sold data for each property
+        _.forEach(buyData, (bv2, bk2) => {
+            if (buyData[bk2]['soldArr'] && buyData[bk]['MAILING STREET ADDRESS'] === buyData[bk2]['MAILING STREET ADDRESS'] && buyData[bk]['SITUS FULL ADDRESS'] !== buyData[bk2]['SITUS FULL ADDRESS']) {
+              
+                if(buyData[bk]['soldArr'].length === buyData[bk2]['soldArr'].length){
+                   dupArr.push(buyData[bk]);
+                } else if(buyData[bk]['soldArr'].length < buyData[bk2]['soldArr'].length){
+                  dupArr.push(buyData[bk]);
+                } else if(buyData[bk]['soldArr'].length > buyData[bk2]['soldArr'].length){
+                  dupArr.push(buyData[bk2]);
+                } 
+            }
 
+        });
+ 
     });
-
-    createJSONFile(buyData, 'total');
+    // Removes Duplicate Mailing addresses filteredBuyData : buyData
+    let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');  
+    createJSONFile(filteredBuyData, 'total');
 
 }
 
-
-var buyCSVData = fs.readFileSync('./csv/buy.csv', 'utf8');
+// Read and Write Files
+let buyCSVData = fs.readFileSync('./csv/buy.csv', 'utf8');
 buyCSVData = d3.csvParse(buyCSVData);
 
-var soldCSVData = fs.readFileSync('./csv/sold.csv', 'utf8');
+let soldCSVData = fs.readFileSync('./csv/sold.csv', 'utf8');
 soldCSVData = d3.csvParse(soldCSVData);
 
-var offerCSVData = fs.readFileSync('./csv/offer.csv', 'utf8');
+let offerCSVData = fs.readFileSync('./csv/offer.csv', 'utf8');
 offerCSVData = d3.csvParse(offerCSVData);
 
 createJSONFile(formatBuyData(buyCSVData), 'buy');
@@ -204,9 +242,9 @@ createJSONFile(formatSoldData(soldCSVData), 'sold');
 createJSONFile(formatOfferData(offerCSVData), 'offer');
 
 
-var buyJSONData = JSON.parse(fs.readFileSync('./src/assets/json/buy.json', 'utf8'));
-var soldJSONData = JSON.parse(fs.readFileSync('./src/assets/json/sold.json', 'utf8'));
-var offerJSONData = JSON.parse(fs.readFileSync('./src/assets/json/offer.json', 'utf8'));
+let buyJSONData = JSON.parse(fs.readFileSync('./src/assets/json/buy.json', 'utf8'));
+let soldJSONData = JSON.parse(fs.readFileSync('./src/assets/json/sold.json', 'utf8'));
+let offerJSONData = JSON.parse(fs.readFileSync('./src/assets/json/offer.json', 'utf8'));
 
 
-mergeD(buyJSONData, soldJSONData, offerJSONData);
+mergeData(buyJSONData, soldJSONData, offerJSONData);

@@ -28,14 +28,13 @@
                         <th class="medium-width">Sold Price</th>
                         <th class="medium-width">EST. Value1</th>
                         <th class="medium-width">EST. Value2</th>
-                        <!-- <th class="medium-width">Offer PPA</th> -->
-                        <th class="medium-width">APP <br />Offer1</th>
-                        <th class="medium-width">APP <br />Offer2</th>
+                        <th class="medium-width">EST. Value3</th>
+                        <th class="medium-width">Final <br />Offer</th>
                         <th class="medium-width">Jason <br />Offer</th>
                     </tr>
                 </thead>
                 <div class="scroll-div">
-                    <tbody *ngFor="let land of lands  let iLand = index">
+                    <tbody *ngFor="let land of lands  | sort: 'estValue': 'desc'; let iLand = index">
                         <div *ngFor="let s of statusColorArr let iStatus =index">
                             <div *ngIf="statusColorArr[iStatus].color === land['statusColor'] && statusColorArr[iStatus].status">
                                 <tr class="buy-row {{land['statusColor']}}">
@@ -48,14 +47,20 @@
                                     <td class="large-width"><a target="_blank" href="https://www.google.com/maps/place/{{land['SITUS FULL ADDRESS']}}">{{ land['SITUS FULL ADDRESS'] }}</a></td>
                                     <td class="medium-width">{{ land['LOT ACREAGE'] | number:'.2' }}</td>
                                     <td class="medium-width">${{ land['avgPPA'] | number }}</td>
+                                    <td class="medium-width">
+                                        <div *ngIf="land['marketValueFlag']" class="market-value-flag red">
+                                            ${{ land['MARKET TOTAL VALUE'] | number }}
+                                            <i class="fas fa-sign"></i> (MV)</div>
+                                    </td>
+                                    <td class="medium-width">${{ land['estValue'] | number }} <br />
+                                        <span class="offers">(${{ land['offer'] | number }})</span></td>
+                                    <td class="medium-width">${{ land['estValue2'] | number }} <br /><span class="offers">(${{ land['offer2'] | number }})</span></td>
+                                    <td class="medium-width">${{ land['estValue3'] | number }} <br /><span class="offers">(${{ land['offer3'] | number }})</span></td>
                                     <td class="medium-width"></td>
-                                    <td class="medium-width">${{ land['EST VALUE'] | number }}</td>
-                                    <td class="medium-width">${{ land['EST VALUE2'] | number }}</td>
-                                    <td class="medium-width">${{ land['OFFER'] | number }}</td>
-                                    <td class="medium-width">${{ land['OFFER2'] | number }}</td>
-                                    <td class="medium-width">${{ land['JASON OFFER'] | number }}</td>
+                                    <td class="medium-width jason-offer">${{ land['jasonOffer'] | number }}
+                                        <span>$<input type="number" step="50" tabindex="{{iLand}}"></span></td>
                                 </tr>
-                                <tr *ngFor="let mile of land['soldArr'] | sort: 'PRICE PER ACRE': 'desc'; let i = index">
+                                <tr *ngFor="let mile of land['soldArr'] | sort: 'distance': 'desc'; let i = index">
                                     <td class="small-width"> </td>
                                     <td class="large-width">{{ i + 1 }} - SOLD ({{mile['distance']}} mi)</td>
                                     <td class="large-width"><a target="_blank" href="{{mile['URL']}}">{{ mile['ADDRESS']+' '+mile['CITY']+', '+mile['STATE']+' '+mile['ZIP'] }}</a></td>
