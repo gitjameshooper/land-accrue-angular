@@ -131,7 +131,8 @@ function mergeData(buyData, soldData, offerData) {
         // 8 miles radius from buy property - Loops through each mile adding to the sold array
         _.forEach([0, 1, 2, 3, 4, 5, 6, 7, 8], (v, k) => {
             _.forEach(soldData, (sv, sk) => {
-                let soldDistance = distance(bv['LATITUDE'], bv['LONGITUDE'], sv['LATITUDE'], sv['LONGITUDE'], 'M'),
+                let soldProp = { ...soldData[sk]},
+                    soldDistance = distance(bv['LATITUDE'], bv['LONGITUDE'], sv['LATITUDE'], sv['LONGITUDE'], 'M'),
                     minAcre = buyData[bk]['LOT ACREAGE'] - 1,
                     maxAcre = buyData[bk]['LOT ACREAGE'] + 1;
                 if (buyData[bk]['LOT ACREAGE'] > 12) {
@@ -154,28 +155,18 @@ function mergeData(buyData, soldData, offerData) {
                     minAcre = buyData[bk]['LOT ACREAGE'] - .25;
                     maxAcre = buyData[bk]['LOT ACREAGE'] + .25;
                 }
-              
-                // Less than 5 sold properties on array and Less than (d) miles away and close to the same lot acreage
-                if (soldArr.length < 5 && soldDistance < v + 1 && soldDistance > v && minAcre < soldData[sk]['LOT ACREAGE'] && maxAcre > soldData[sk]['LOT ACREAGE']) {
-                  let soldProp = soldData.slice();
-                    soldProp[sk]['distance'] = Math.round(soldDistance * 100) / 100;
-                        // console.log('BUY:'+buyData[bk]['SITUS FULL ADDRESS']);
-                        // console.log(soldProp[sk]['ADDRESS']+'-'+soldDistance);
-                        // console.log('-------------------');
-                    totalPricePerAcre += soldData[sk]['PRICE PER ACRE'];
-                    soldArr.push(soldProp[sk]);
 
-                  
-                    // console.log(soldArr);
+                // Less than 5 sold properties on array and Less than (d) miles away and close to the same lot acreage
+                if (soldArr.length < 5 && soldDistance < v + 1 && soldDistance > v && minAcre < soldProp['LOT ACREAGE'] && maxAcre > soldProp['LOT ACREAGE']) {
+
+                    soldProp['distance'] = Math.round(soldDistance * 100) / 100;
+                    totalPricePerAcre += soldData[sk]['PRICE PER ACRE'];
+                    soldArr.push(soldProp);
                 }
             });
         });
-        buyData[bk]['soldArr'] = [];
-          buyData[bk]['soldArr'] = soldArr;
-            console.log('-------------------');
-              console.log('-------------------');
-                console.log('-------------------');
-        
+        buyData[bk]['soldArr'] = soldArr;
+
 
         // Top 3 Closests by distance: Properties Price per Acre
         let sortedDistanceSoldArr = _.sortBy(soldArr, ['distance']);
@@ -190,10 +181,6 @@ function mergeData(buyData, soldData, offerData) {
             totalPPADistance = sortedDistanceSoldArr[0]['PRICE PER ACRE'];
         }
 
-        // if (buyData[bk]['SITUS FULL ADDRESS'] === '7998 FM 539 SUTHERLAND SPRINGS,TX 78161') {
-        //     console.log(sortedDistanceSoldArr);
-        //     console.log(totalPPADistance);
-        // }
         buyData[bk]['avgPPA'] = totalPPADistance / 3;
 
 
@@ -247,11 +234,7 @@ function mergeData(buyData, soldData, offerData) {
         if (buyData[bk]['marketValueFlag']) {
             buyData[bk]['statusColor'] = 'red';
         }
-        if (buyData[bk]['SITUS FULL ADDRESS'] === '7998 FM 539 SUTHERLAND SPRINGS,TX 78161') {
-            console.log(sortedDistanceSoldArr);
 
-        }
-       
 
         // Remove Duplicates: Choose from the most sold data for each property
         _.forEach(buyData, (bv2, bk2) => {
@@ -267,22 +250,16 @@ function mergeData(buyData, soldData, offerData) {
             }
 
         });
-        BD.push(buyData[bk]);
-// console.log(BD[bk]);
     });
 
     // Removes Duplicate Mailing addresses filteredBuyData : buyData
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
-    
-        console.log(BD[2].soldArr);
-    console.log('--------------');
-        console.log(BD[4].soldArr);
-    // createJSONFile(filteredBuyData, 'total');
+    createJSONFile(filteredBuyData, 'total');
 
 }
 
 // Read and Write Files
-let buyCSVData = fs.readFileSync('./csv/buy2.csv', 'utf8');
+let buyCSVData = fs.readFileSync('./csv/buy.csv', 'utf8');
 buyCSVData = d3.csvParse(buyCSVData);
 
 let soldCSVData = fs.readFileSync('./csv/sold.csv', 'utf8');
