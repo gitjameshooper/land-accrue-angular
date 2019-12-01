@@ -1,10 +1,4 @@
- 1:-Solve distance Bug...
- 3:-Make 3 Estimated Values off comps. 
- (1 by the top 3 closests properties)
- (1 by the middle 3 of the 5 properties based on Avg. PPA)
- (1 by the Avg. PPA of all 5 properties)
- with offers that are 50% in parentheses
-
+Create State:
 4:-Create grayed out section for items not to be included in the final csv
 Figure out how to make state with app updating json object for final csv create editable JSON object then merge that with the final at the end?
 
@@ -14,6 +8,11 @@ Figure out how to make state with app updating json object for final csv create 
 
 
 Completed Items:
+-Make 3 Estimated Values off comps. 
+ (1 by the top 3 closests properties)
+ (1 by the middle 3 of the 5 properties based on Avg. PPA)
+ (1 by the Avg. PPA of all 5 properties)
+ with offers that are 50% in parentheses
 -Added links to google maps and redfin
 -Sorted buy properties by estimated value 1
 -Sorted sold properties by distance

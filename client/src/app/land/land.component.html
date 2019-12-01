@@ -62,7 +62,7 @@
                                 </tr>
                                 <tr *ngFor="let mile of land['soldArr'] | sort: 'distance': 'desc'; let i = index">
                                     <td class="small-width"> </td>
-                                    <td class="large-width">{{ i + 1 }} - SOLD ({{mile['distance']}} mi)</td>
+                                    <td class="large-width" align="left">{{ i + 1 }} - SOLD ({{mile['distance']}} mi)</td>
                                     <td class="large-width"><a target="_blank" href="{{mile['URL']}}">{{ mile['ADDRESS']+' '+mile['CITY']+', '+mile['STATE']+' '+mile['ZIP'] }}</a></td>
                                     <td class="medium-width"> {{ mile['LOT ACREAGE'] | number:'.2'}}</td>
                                     <td class="medium-width">${{ mile['PRICE PER ACRE'] | number:'.0' }}</td>
