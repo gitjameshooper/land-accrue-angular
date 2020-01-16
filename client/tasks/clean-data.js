@@ -2,11 +2,46 @@ const d3 = require('d3')
 const fs = require('fs')
 const _ = require('lodash')
 const path = require('path')
+const { Parser } = require('json2csv')
 
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
-    console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' Property Data Complete');
+    console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' JSON Property Data Complete');
+}
+
+function createCSVFile(propertyData, name) {
+ 
+    const fields =  ["SITUS FULL ADDRESS",
+    "SITUS CITY",
+    "COUNTY",
+    "LOT AREA",
+    "LOT ACREAGE",
+    "IN FLOOD ZONE",
+    "OWNER MAILING NAME",
+    "MAILING STREET ADDRESS",
+    "MAIL CITY",
+    "MAIL STATE",
+    "MAIL ZIPZIP4",
+    "MARKET TOTAL VALUE",
+    "id",
+    "avgPPA",
+    "avgPPA2",
+    "avgPPA3",
+    "estValue",
+    "estValue2",
+    "estValue3",
+    "offer",
+    "offer2",
+    "offer3",
+    "offerPPA"];
+     
+     
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(propertyData);
+ 
+    fs.writeFileSync('./src/assets/csv/' + name + '.csv', csv);
+    console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' CSV Property Data Complete');
 }
 
 function formatSoldData(csv) {
@@ -255,6 +290,8 @@ function mergeData(buyData, soldData, offerData) {
     // Removes Duplicate Mailing addresses filteredBuyData : buyData
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
     createJSONFile(filteredBuyData, 'total');
+    createCSVFile(filteredBuyData, 'total');
+
 
 }
 
