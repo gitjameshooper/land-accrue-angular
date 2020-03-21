@@ -7,7 +7,13 @@ Figure out how to make state with app updating json object for final csv create 
 7:-Upload app to production at jameshooper.site/land-accrue
 
 
+
+
+
 Completed Items:
+-Create seperate csv files for flood zone or non flood zone
+-APN vs Alternate APN use the value number with the least digits
+-Add estimated value column
 -Make 3 Estimated Values off comps. 
  (1 by the top 3 closests properties)
  (1 by the middle 3 of the 5 properties based on Avg. PPA)

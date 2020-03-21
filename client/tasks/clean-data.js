@@ -4,6 +4,7 @@ const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
 
+var county = 'brown';
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
@@ -12,35 +13,31 @@ function createJSONFile(propertyData, name) {
 
 function createCSVFile(propertyData, name) {
  
-    const fields =  ["SITUS FULL ADDRESS",
+    const fields =  [
+    "statusColor",
+    "propertyLink",
+    "offer",
+    "estimatedValue",
+    "LOT ACREAGE",
+    "SITUS FULL ADDRESS",
     "SITUS CITY",
     "COUNTY",
     "LOT AREA",
-    "LOT ACREAGE",
     "IN FLOOD ZONE",
+    "APN - UNFORMATTED",
     "OWNER MAILING NAME",
     "MAILING STREET ADDRESS",
     "MAIL CITY",
     "MAIL STATE",
     "MAIL ZIPZIP4",
-    "MARKET TOTAL VALUE",
-    "id",
-    "avgPPA",
-    "avgPPA2",
-    "avgPPA3",
-    "estValue",
-    "estValue2",
-    "estValue3",
-    "offer",
-    "offer2",
-    "offer3",
-    "offerPPA"];
+    "MARKET TOTAL VALUE"
+    ];
      
      
     const json2csvParser = new Parser({ fields });
     const csv = json2csvParser.parse(propertyData);
  
-    fs.writeFileSync('./src/assets/csv/' + name + '.csv', csv);
+    fs.writeFileSync('./csv/' + county + '/' + name + '.csv', csv);
     console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' CSV Property Data Complete');
 }
 
@@ -84,6 +81,7 @@ function formatBuyData(csv) {
             'LOT ACREAGE': Number(o['LOT ACREAGE']),
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
+            'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
             'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
             'OWNER MAILING NAME': o['OWNER MAILING NAME'],
             'MAILING STREET ADDRESS': o['MAILING STREET ADDRESS'].trim(),
@@ -99,6 +97,7 @@ function formatBuyData(csv) {
             'estValue2': 0,
             'estValue3': 0,
             'offer': 0,
+            'offer1': 0,
             'offer2': 0,
             'offer3': 0,
             'offerPPA': 0,
@@ -106,6 +105,7 @@ function formatBuyData(csv) {
             'jasonEstValue': 0,
             'statusColor': '',
             'marketValueFlag': false,
+            'propertyLink': 'https://www.google.com/search?q='+o['SITUS FULL ADDRESS'].trim().replace(/[ ]/g,'+').replace('++','+')
         })
 
 
@@ -152,15 +152,17 @@ function distance(lat1, lon1, lat2, lon2, unit) {
         return dist;
     }
 }
-
-function mergeData(buyData, soldData, offerData) {
+// function mergeData(buyData, soldData, offerData) {
+function mergeData(buyData, soldData) {
     let dupArr = [],
         uniqueId = 1,
-        BD = [];
+        BD = [],
+        buyDataFlood = [],
+        buyDataNonFlood = [];
     _.forEach(buyData, (bv, bk) => {
         let soldArr = [],
-            totalPricePerAcre = 0,
-            offerObj = _.find(offerData, { 'SITUS FULL ADDRESS': buyData[bk]['SITUS FULL ADDRESS'] });
+            totalPricePerAcre = 0;
+            // offerObj = _.find(offerData, { 'SITUS FULL ADDRESS': buyData[bk]['SITUS FULL ADDRESS'] });
             buyData[bk]['id'] = uniqueId++;
 
         // 8 miles radius from buy property - Loops through each mile adding to the sold array
@@ -206,61 +208,76 @@ function mergeData(buyData, soldData, offerData) {
         // Top 3 Closests by distance: Properties Price per Acre
         let sortedDistanceSoldArr = _.sortBy(soldArr, ['distance']);
         let totalPPADistance = 0;
+        let totalPPADistanceDivider = 0;
 
 
         if (sortedDistanceSoldArr[0] && sortedDistanceSoldArr[1] && sortedDistanceSoldArr[2]) {
             totalPPADistance = sortedDistanceSoldArr[0]['PRICE PER ACRE'] + sortedDistanceSoldArr[1]['PRICE PER ACRE'] + sortedDistanceSoldArr[2]['PRICE PER ACRE'];
+           totalPPADistanceDivider = 3;
         } else if (sortedDistanceSoldArr[0] && sortedDistanceSoldArr[1]) {
             totalPPADistance = sortedDistanceSoldArr[0]['PRICE PER ACRE'] + sortedDistanceSoldArr[1]['PRICE PER ACRE'];
+            totalPPADistanceDivider = 2;
         } else if (sortedDistanceSoldArr[0]) {
             totalPPADistance = sortedDistanceSoldArr[0]['PRICE PER ACRE'];
+            totalPPADistanceDivider = 1;
         }
 
-        buyData[bk]['avgPPA'] = totalPPADistance / 3;
+        buyData[bk]['avgPPA'] = totalPPADistance / totalPPADistanceDivider;
 
 
         // 3 middle with avg. Price per Acre
         let sortedPPASoldArr = _.sortBy(soldArr, ['PRICE PER ACRE']);
 
         let totalPPAMiddle = 0;
+        let totalPPAMiddleDivider = 0;
         if (sortedPPASoldArr[1] && sortedPPASoldArr[2] && sortedPPASoldArr[3]) {
             totalPPAMiddle = sortedPPASoldArr[1]['PRICE PER ACRE'] + sortedPPASoldArr[2]['PRICE PER ACRE'] + sortedPPASoldArr[3]['PRICE PER ACRE'];
+            totalPPAMiddleDivider = 3;
         } else if (sortedPPASoldArr[1] && sortedPPASoldArr[2]) {
             totalPPAMiddle = sortedPPASoldArr[1]['PRICE PER ACRE'] + sortedPPASoldArr[2]['PRICE PER ACRE'];
+            totalPPAMiddleDivider = 2;
         } else if (sortedPPASoldArr[1]) {
             totalPPAMiddle = sortedPPASoldArr[1]['PRICE PER ACRE'];
+            totalPPAMiddleDivider = 1;
         }
-        buyData[bk]['avgPPA2'] = totalPPAMiddle / 3;
+        buyData[bk]['avgPPA2'] = totalPPAMiddle / totalPPAMiddleDivider;
 
         // All 5 avg. Price per Acre
         buyData[bk]['avgPPA3'] = totalPricePerAcre > 0 ? Math.round(totalPricePerAcre / soldArr.length) : 0;
 
-        // Flood Zone TRUE-> discount 50%
+        // Flood Zone TRUE-> discount 25%
         if (buyData[bk]['IN FLOOD ZONE']) {
-            buyData[bk]['avgPPA'] *= .50;
-            buyData[bk]['avgPPA2'] *= .50;
-            buyData[bk]['avgPPA3'] *= .50;
+            buyData[bk]['avgPPA'] *= .75;
+            buyData[bk]['avgPPA2'] *= .75;
+            buyData[bk]['avgPPA3'] *= .75;
         }
 
         // Calculates Estimated Values and Offers
         buyData[bk]['estValue'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);
         buyData[bk]['estValue2'] = Math.round(buyData[bk]['avgPPA2'] * buyData[bk]['LOT ACREAGE'])
         buyData[bk]['estValue3'] = Math.round(buyData[bk]['avgPPA3'] * buyData[bk]['LOT ACREAGE'])
-        buyData[bk]['offer'] = Math.floor((buyData[bk]['estValue'] * .50) / 100) * 100;
+        buyData[bk]['offer1'] = Math.floor((buyData[bk]['estValue'] * .50) / 100) * 100;
         buyData[bk]['offer2'] = Math.floor((buyData[bk]['estValue2'] * .50) / 100) * 100;
         buyData[bk]['offer3'] = Math.floor((buyData[bk]['estValue3'] * .50) / 100) * 100;
         buyData[bk]['offerPPA'] = Math.round(buyData[bk]['offer'] / buyData[bk]['LOT ACREAGE']);
-        buyData[bk]['jasonOffer'] = offerObj ? offerObj['jasonOffer'] : 0;
-        buyData[bk]['jasonEstValue'] = offerObj ? offerObj['jasonEstValue'] : 0;
+
+        // buyData[bk]['jasonOffer'] = offerObj ? offerObj['jasonOffer'] : 0;
+        // buyData[bk]['jasonEstValue'] = offerObj ? offerObj['jasonEstValue'] : 0;
 
 
         // Add status color based off the amount of sold propeties
         if (soldArr.length > 3) {
             buyData[bk]['statusColor'] = 'green';
+            buyData[bk]['offer'] = buyData[bk]['offer2'];
+            buyData[bk]['estimatedValue'] = buyData[bk]['estValue2'];
         } else if (soldArr.length <= 3 && soldArr.length > 1) {
             buyData[bk]['statusColor'] = 'yellow';
+            buyData[bk]['offer'] = buyData[bk]['offer3']
+            buyData[bk]['estimatedValue'] = buyData[bk]['estValue3'];
         } else {
             buyData[bk]['statusColor'] = 'red';
+            buyData[bk]['offer'] = buyData[bk]['offer3']
+            buyData[bk]['estimatedValue'] = buyData[bk]['estValue3'];
         }
 
         // MARKET TOTAL VALUE vs Estimated Value
@@ -285,34 +302,49 @@ function mergeData(buyData, soldData, offerData) {
             }
 
         });
+
+        // Flood Zone Seperationg Data
+        if (buyData[bk]['IN FLOOD ZONE']) {
+            buyDataFlood[bk] = buyData[bk];
+        } else {
+            buyDataNonFlood[bk] = buyData[bk];
+        }
+
+
     });
 
     // Removes Duplicate Mailing addresses filteredBuyData : buyData
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
     createJSONFile(filteredBuyData, 'total');
-    createCSVFile(filteredBuyData, 'total');
+
+    let filteredBuyNonFloodData = _.differenceBy(buyDataNonFlood, dupArr, 'id');
+    createCSVFile(filteredBuyNonFloodData, 'total');
+ 
+    let filteredBuyDataFlood = _.differenceBy(buyDataFlood, dupArr, 'id');
+    createCSVFile(filteredBuyDataFlood , 'total-flood');
 
 
 }
 
 // Read and Write Files
-let buyCSVData = fs.readFileSync('./csv/buy.csv', 'utf8');
+let buyCSVData = fs.readFileSync('./csv/'+county+'/buy.csv', 'utf8');
 buyCSVData = d3.csvParse(buyCSVData);
 
-let soldCSVData = fs.readFileSync('./csv/sold.csv', 'utf8');
+let soldCSVData = fs.readFileSync('./csv/'+county+'/sold.csv', 'utf8');
 soldCSVData = d3.csvParse(soldCSVData);
 
-let offerCSVData = fs.readFileSync('./csv/offer.csv', 'utf8');
-offerCSVData = d3.csvParse(offerCSVData);
+// let offerCSVData = fs.readFileSync('./csv/'+county+'/offer.csv', 'utf8');
+// offerCSVData = d3.csvParse(offerCSVData);
 
 createJSONFile(formatBuyData(buyCSVData), 'buy');
 createJSONFile(formatSoldData(soldCSVData), 'sold');
-createJSONFile(formatOfferData(offerCSVData), 'offer');
+// createJSONFile(formatOfferData(offerCSVData), 'offer');
 
 
 let buyJSONData = JSON.parse(fs.readFileSync('./src/assets/json/buy.json', 'utf8'));
 let soldJSONData = JSON.parse(fs.readFileSync('./src/assets/json/sold.json', 'utf8'));
-let offerJSONData = JSON.parse(fs.readFileSync('./src/assets/json/offer.json', 'utf8'));
+// let offerJSONData = JSON.parse(fs.readFileSync('./src/assets/json/offer.json', 'utf8'));
 
 
-mergeData(buyJSONData, soldJSONData, offerJSONData);
+// mergeData(buyJSONData, soldJSONData, offerJSONData);
+mergeData(buyJSONData, soldJSONData);
