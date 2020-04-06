@@ -4,7 +4,7 @@ const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
 
-var county = 'brown';
+var county = 'las-animas';
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
@@ -46,15 +46,16 @@ function formatSoldData(csv) {
 
     csv.forEach(o => {
         let acreSquareFeet = 43560;
+
         orderArr.push({
             'ADDRESS': o['ADDRESS'],
             'CITY': o['CITY'],
             'STATE': o['STATE OR PROVINCE'],
             'ZIP': o['ZIP OR POSTAL CODE'],
-            'SOLD PRICE': o['PRICE'],
+            'SOLD PRICE': o['PRICE'].replace('$', '').replace(',', '').split('.'),
             'LOT AREA': Number(o['LOT SIZE']),
             'LOT ACREAGE': Number(parseFloat(o['LOT SIZE'] / acreSquareFeet).toFixed(2)),
-            'PRICE PER ACRE': Math.round(o['PRICE'] / (o['LOT SIZE'] / acreSquareFeet)),
+            'PRICE PER ACRE': Math.round(o['PRICE'].replace('$', '').replace(',', '').split('.') / (o['LOT SIZE'] / acreSquareFeet)),
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
             'URL': o['URL (SEE http://www.redfin.com/buy-a-home/comparative-market-analysis FOR INFO ON PRICING)'],
@@ -212,6 +213,7 @@ function mergeData(buyData, soldData) {
 
 
         if (sortedDistanceSoldArr[0] && sortedDistanceSoldArr[1] && sortedDistanceSoldArr[2]) {
+
             totalPPADistance = sortedDistanceSoldArr[0]['PRICE PER ACRE'] + sortedDistanceSoldArr[1]['PRICE PER ACRE'] + sortedDistanceSoldArr[2]['PRICE PER ACRE'];
            totalPPADistanceDivider = 3;
         } else if (sortedDistanceSoldArr[0] && sortedDistanceSoldArr[1]) {
@@ -251,7 +253,7 @@ function mergeData(buyData, soldData) {
             buyData[bk]['avgPPA2'] *= .75;
             buyData[bk]['avgPPA3'] *= .75;
         }
-
+        
         // Calculates Estimated Values and Offers
         buyData[bk]['estValue'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);
         buyData[bk]['estValue2'] = Math.round(buyData[bk]['avgPPA2'] * buyData[bk]['LOT ACREAGE'])
