@@ -1,3 +1,4 @@
+ 
 Create State:
 4:-Create grayed out section for items not to be included in the final csv
 Figure out how to make state with app updating json object for final csv create editable JSON object then merge that with the final at the end?
@@ -11,6 +12,19 @@ Figure out how to make state with app updating json object for final csv create 
 
 
 Completed Items:
+-Change property link to google maps long and lat to total.csv
+
+-price per acre on buy property col for total.csv
+-remove duplicate filter for mailing addresses or owner's names
+-Move property link to last column
+-Add legal description from the buy data in total.csv
+-Legal Lot from the Buy.csv to total.csv
+-Subdivision from buy.csv to total.csv
+-estimatedvalue col as col B in total.csv
+-put in date column of today's date for running scan
+
+
+
 -Create seperate csv files for flood zone or non flood zone
 -APN vs Alternate APN use the value number with the least digits
 -Add estimated value column

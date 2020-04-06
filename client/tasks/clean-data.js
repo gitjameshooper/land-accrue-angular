@@ -15,10 +15,13 @@ function createCSVFile(propertyData, name) {
  
     const fields =  [
     "statusColor",
-    "propertyLink",
-    "offer",
     "estimatedValue",
     "LOT ACREAGE",
+    "pricePerAcre",
+    "offer",
+    "SUBDIVISION",
+    "LEGAL DESCRIPTION",
+    "LEGAL LOT",
     "SITUS FULL ADDRESS",
     "SITUS CITY",
     "COUNTY",
@@ -30,7 +33,9 @@ function createCSVFile(propertyData, name) {
     "MAIL CITY",
     "MAIL STATE",
     "MAIL ZIPZIP4",
-    "MARKET TOTAL VALUE"
+    "MARKET TOTAL VALUE",
+    "date",
+    "propertyLink"
     ];
      
      
@@ -80,6 +85,9 @@ function formatBuyData(csv) {
             'COUNTY': o['COUNTY'],
             'LOT AREA': Number(o['LOT AREA']),
             'LOT ACREAGE': Number(o['LOT ACREAGE']),
+            'LEGAL DESCRIPTION' : o['LEGAL DESCRIPTION'],
+            'LEGAL LOT' : o['LEGAL LOT'],
+            'SUBDIVISION' : o['SUBDIVISION'],
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
             'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
@@ -90,7 +98,9 @@ function formatBuyData(csv) {
             'MAIL STATE': o['MAIL STATE'].trim(),
             'MAIL ZIPZIP4': o['MAIL ZIP/ZIP+4'].replace('\"', '').replace('\"', '').replace('=', ''),
             'MARKET TOTAL VALUE': Number(marketValueArr[0]),
+            'date': getFormattedDate(),
             'id': 0,
+            'pricePerAcre': 0,
             'avgPPA': 0,
             'avgPPA2': 0,
             'avgPPA3': 0,
@@ -106,13 +116,19 @@ function formatBuyData(csv) {
             'jasonEstValue': 0,
             'statusColor': '',
             'marketValueFlag': false,
-            'propertyLink': 'https://www.google.com/search?q='+o['SITUS FULL ADDRESS'].trim().replace(/[ ]/g,'+').replace('++','+')
+            // 'propertyLink': 'https://www.google.com/search?q='+o['SITUS FULL ADDRESS'].trim().replace(/[ ]/g,'+').replace('++','+')
+            'propertyLink': 'https://www.google.com/maps/place/'+o['LATITUDE']+'+'+o['LONGITUDE']
         })
 
 
     })
 
     return orderArr
+}
+
+function getFormattedDate() {
+    var date = new Date();
+     return ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + date.getFullYear();
 }
 
 function formatOfferData(csv) {
@@ -272,6 +288,7 @@ function mergeData(buyData, soldData) {
             buyData[bk]['statusColor'] = 'green';
             buyData[bk]['offer'] = buyData[bk]['offer2'];
             buyData[bk]['estimatedValue'] = buyData[bk]['estValue2'];
+
         } else if (soldArr.length <= 3 && soldArr.length > 1) {
             buyData[bk]['statusColor'] = 'yellow';
             buyData[bk]['offer'] = buyData[bk]['offer3']
@@ -281,7 +298,9 @@ function mergeData(buyData, soldData) {
             buyData[bk]['offer'] = buyData[bk]['offer3']
             buyData[bk]['estimatedValue'] = buyData[bk]['estValue3'];
         }
-
+        
+        // Calculate Price Per Acre
+        buyData[bk]['pricePerAcre'] = Math.round(buyData[bk]['estimatedValue'] / buyData[bk]['LOT ACREAGE']);
         // MARKET TOTAL VALUE vs Estimated Value
         buyData[bk]['marketValueFlag'] = (buyData[bk]['statusColor'] !== 'red') && (buyData[bk]['MARKET TOTAL VALUE'] / buyData[bk]['estValue']) > 2 ? true : false;
 
@@ -291,19 +310,19 @@ function mergeData(buyData, soldData) {
 
 
         // Remove Duplicates: Choose from the most sold data for each property
-        _.forEach(buyData, (bv2, bk2) => {
-            if (buyData[bk2]['soldArr'] && buyData[bk]['MAILING STREET ADDRESS'] === buyData[bk2]['MAILING STREET ADDRESS'] && buyData[bk]['SITUS FULL ADDRESS'] !== buyData[bk2]['SITUS FULL ADDRESS']) {
+        // _.forEach(buyData, (bv2, bk2) => {
+        //     if (buyData[bk2]['soldArr'] && buyData[bk]['MAILING STREET ADDRESS'] === buyData[bk2]['MAILING STREET ADDRESS'] && buyData[bk]['SITUS FULL ADDRESS'] !== buyData[bk2]['SITUS FULL ADDRESS']) {
 
-                if (buyData[bk]['soldArr'].length === buyData[bk2]['soldArr'].length) {
-                    dupArr.push(buyData[bk]);
-                } else if (buyData[bk]['soldArr'].length < buyData[bk2]['soldArr'].length) {
-                    dupArr.push(buyData[bk]);
-                } else if (buyData[bk]['soldArr'].length > buyData[bk2]['soldArr'].length) {
-                    dupArr.push(buyData[bk2]);
-                }
-            }
+        //         if (buyData[bk]['soldArr'].length === buyData[bk2]['soldArr'].length) {
+        //             dupArr.push(buyData[bk]);
+        //         } else if (buyData[bk]['soldArr'].length < buyData[bk2]['soldArr'].length) {
+        //             dupArr.push(buyData[bk]);
+        //         } else if (buyData[bk]['soldArr'].length > buyData[bk2]['soldArr'].length) {
+        //             dupArr.push(buyData[bk2]);
+        //         }
+        //     }
 
-        });
+        // });
 
         // Flood Zone Seperationg Data
         if (buyData[bk]['IN FLOOD ZONE']) {
