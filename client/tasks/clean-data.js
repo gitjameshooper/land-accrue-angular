@@ -20,6 +20,7 @@ function createCSVFile(propertyData, name) {
     "pricePerAcre",
     "offer",
     "SUBDIVISION",
+    "MUNICIPALITY/TOWNSHIP",
     "LEGAL DESCRIPTION",
     "LEGAL LOT",
     "SITUS FULL ADDRESS",
@@ -34,6 +35,8 @@ function createCSVFile(propertyData, name) {
     "MAIL STATE",
     "MAIL ZIPZIP4",
     "MARKET TOTAL VALUE",
+    "LONGITUDE",
+    "LATITUDE",
     "date",
     "propertyLink"
     ];
@@ -77,21 +80,25 @@ function formatBuyData(csv) {
     let orderArr = [];
 
     csv.forEach(o => {
+  
+       
         let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').split('.');
         orderArr.push({
-            'SITUS FULL ADDRESS': o['SITUS FULL ADDRESS'].trim(),
+            'SITUS STREET ADDRESS': o['SITUS STREET ADDRESS'].trim().replace(',', ''),
             'SITUS CITY': o['SITUS CITY'].trim(),
-            'ALTERNATE APN': o['ALTERNATE APN'].replace('\"', '').replace('\"', '').replace('=', ''),
+            // 'ALTERNATE APN': o['ALTERNATE APN'].replace('\"', '').replace('\"', '').replace('=', ''),
             'COUNTY': o['COUNTY'],
             'LOT AREA': Number(o['LOT AREA']),
             'LOT ACREAGE': Number(o['LOT ACREAGE']),
             'LEGAL DESCRIPTION' : o['LEGAL DESCRIPTION'],
             'LEGAL LOT' : o['LEGAL LOT'],
             'SUBDIVISION' : o['SUBDIVISION'],
+            'MUNICIPALITY/TOWNSHIP' : o['MUNICIPALITY/TOWNSHIP'],
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
-            'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
-            'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
+                        // 'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
+            'APN - UNFORMATTED': o['APN - UNFORMATTED'],
+            // 'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
             'OWNER MAILING NAME': o['OWNER MAILING NAME'],
             'MAILING STREET ADDRESS': o['MAILING STREET ADDRESS'].trim(),
             'MAIL CITY': o['MAIL CITY'].trim(),
