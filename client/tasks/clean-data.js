@@ -4,7 +4,7 @@ const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
 
-var county = 'las-animas';
+var county = 'hunt';
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
@@ -23,9 +23,11 @@ function createCSVFile(propertyData, name) {
     "MUNICIPALITY/TOWNSHIP",
     "LEGAL DESCRIPTION",
     "LEGAL LOT",
-    "SITUS FULL ADDRESS",
-    "SITUS CITY",
+    "SITUS STREET ADDRESS",
     "COUNTY",
+    "SITUS CITY",
+    "SITUS ZIP CODE",
+    "SITUS STATE",
     "LOT AREA",
     "IN FLOOD ZONE",
     "APN - UNFORMATTED",
@@ -35,8 +37,8 @@ function createCSVFile(propertyData, name) {
     "MAIL STATE",
     "MAIL ZIPZIP4",
     "MARKET TOTAL VALUE",
-    "LONGITUDE",
     "LATITUDE",
+    "LONGITUDE",
     "date",
     "propertyLink"
     ];
@@ -82,10 +84,12 @@ function formatBuyData(csv) {
     csv.forEach(o => {
   
        
-        let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').split('.');
+        let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
         orderArr.push({
             'SITUS STREET ADDRESS': o['SITUS STREET ADDRESS'].trim().replace(',', ''),
             'SITUS CITY': o['SITUS CITY'].trim(),
+            'SITUS STATE': o['SITUS STATE'].trim(),
+            'SITUS ZIP CODE': o['SITUS ZIP CODE'].trim(),
             // 'ALTERNATE APN': o['ALTERNATE APN'].replace('\"', '').replace('\"', '').replace('=', ''),
             'COUNTY': o['COUNTY'],
             'LOT AREA': Number(o['LOT AREA']),
@@ -96,7 +100,8 @@ function formatBuyData(csv) {
             'MUNICIPALITY/TOWNSHIP' : o['MUNICIPALITY/TOWNSHIP'],
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
-                        // 'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
+ 
+            // 'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
             'APN - UNFORMATTED': o['APN - UNFORMATTED'],
             // 'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
             'OWNER MAILING NAME': o['OWNER MAILING NAME'],
