@@ -20,25 +20,27 @@ function createCSVFile(propertyData, name) {
     "pricePerAcre",
     "offer",
     "SUBDIVISION",
+    "SITUS CITY",
+    "SITUS ZIP CODE",
+    "LATITUDE",
+    "LONGITUDE",
+    "MARKET TOTAL VALUE",
+    "MARKET IMPROVEMENT VALUE",
     "MUNICIPALITY/TOWNSHIP",
     "LEGAL DESCRIPTION",
     "LEGAL LOT",
+    "IN FLOOD ZONE",
     "SITUS STREET ADDRESS",
     "COUNTY",
-    "SITUS CITY",
-    "SITUS ZIP CODE",
     "SITUS STATE",
     "LOT AREA",
-    "IN FLOOD ZONE",
-    "APN - UNFORMATTED",
+    "APN - FORMATTED",
+    // "APN - UNFORMATTED",
     "OWNER MAILING NAME",
     "MAILING STREET ADDRESS",
     "MAIL CITY",
     "MAIL STATE",
     "MAIL ZIPZIP4",
-    "MARKET TOTAL VALUE",
-    "LATITUDE",
-    "LONGITUDE",
     "date",
     "propertyLink"
     ];
@@ -55,17 +57,17 @@ function formatSoldData(csv) {
     let orderArr = [];
 
     csv.forEach(o => {
-        let acreSquareFeet = 43560;
-
+        let acreSquareFeet = 43560,
+            priceArr = o[' PRICE '].replace('$', '').replace(',', '').replace(' ', '').split('.');
         orderArr.push({
             'ADDRESS': o['ADDRESS'],
             'CITY': o['CITY'],
             'STATE': o['STATE OR PROVINCE'],
             'ZIP': o['ZIP OR POSTAL CODE'],
-            'SOLD PRICE': o['PRICE'].replace('$', '').replace(',', '').split('.'),
+            'SOLD PRICE': Number(priceArr[0]),
             'LOT AREA': Number(o['LOT SIZE']),
             'LOT ACREAGE': Number(parseFloat(o['LOT SIZE'] / acreSquareFeet).toFixed(2)),
-            'PRICE PER ACRE': Math.round(o['PRICE'].replace('$', '').replace(',', '').split('.') / (o['LOT SIZE'] / acreSquareFeet)),
+            'PRICE PER ACRE': Math.round(Number(priceArr[0]) / (o['LOT SIZE'] / acreSquareFeet)),
             'LATITUDE': o['LATITUDE'],
             'LONGITUDE': o['LONGITUDE'],
             'URL': o['URL (SEE http://www.redfin.com/buy-a-home/comparative-market-analysis FOR INFO ON PRICING)'],
@@ -83,8 +85,9 @@ function formatBuyData(csv) {
 
     csv.forEach(o => {
   
-       
-        let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
+               // console.log(o);
+        let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.'),
+            marketImproveValueArr = o['MARKET IMPROVEMENT VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
         orderArr.push({
             'SITUS STREET ADDRESS': o['SITUS STREET ADDRESS'].trim().replace(',', ''),
             'SITUS CITY': o['SITUS CITY'].trim(),
@@ -102,14 +105,18 @@ function formatBuyData(csv) {
             'LONGITUDE': o['LONGITUDE'],
  
             // 'APN - UNFORMATTED': o['APN - UNFORMATTED'].length > o['ALTERNATE APN'].length ? o['ALTERNATE APN'] : o['APN - UNFORMATTED'],
-            'APN - UNFORMATTED': o['APN - UNFORMATTED'],
+            // 'APN - UNFORMATTED': o['APN - UNFORMATTED'],
+            'APN - FORMATTED': o['APN - FORMATTED'],
             // 'IN FLOOD ZONE': o['INSIDE SFHA'].includes('TRUE'),
+            // Flood zone A and AE  true;  X  and blank false
+            'IN FLOOD ZONE': o['FLOOD ZONE CODE'],
             'OWNER MAILING NAME': o['OWNER MAILING NAME'],
             'MAILING STREET ADDRESS': o['MAILING STREET ADDRESS'].trim(),
             'MAIL CITY': o['MAIL CITY'].trim(),
             'MAIL STATE': o['MAIL STATE'].trim(),
             'MAIL ZIPZIP4': o['MAIL ZIP/ZIP+4'].replace('\"', '').replace('\"', '').replace('=', ''),
             'MARKET TOTAL VALUE': Number(marketValueArr[0]),
+            'MARKET IMPROVEMENT VALUE': Number(marketImproveValueArr[0]),
             'date': getFormattedDate(),
             'id': 0,
             'pricePerAcre': 0,
@@ -186,6 +193,7 @@ function mergeData(buyData, soldData) {
     let dupArr = [],
         uniqueId = 1,
         BD = [],
+        buyDataAll = [],
         buyDataFlood = [],
         buyDataNonFlood = [];
     _.forEach(buyData, (bv, bk) => {
@@ -276,11 +284,11 @@ function mergeData(buyData, soldData) {
         buyData[bk]['avgPPA3'] = totalPricePerAcre > 0 ? Math.round(totalPricePerAcre / soldArr.length) : 0;
 
         // Flood Zone TRUE-> discount 25%
-        if (buyData[bk]['IN FLOOD ZONE']) {
-            buyData[bk]['avgPPA'] *= .75;
-            buyData[bk]['avgPPA2'] *= .75;
-            buyData[bk]['avgPPA3'] *= .75;
-        }
+        // if (buyData[bk]['IN FLOOD ZONE']) {
+        //     buyData[bk]['avgPPA'] *= .75;
+        //     buyData[bk]['avgPPA2'] *= .75;
+        //     buyData[bk]['avgPPA3'] *= .75;
+        // }
         
         // Calculates Estimated Values and Offers
         buyData[bk]['estValue'] = Math.round(buyData[bk]['avgPPA'] * buyData[bk]['LOT ACREAGE']);
@@ -337,12 +345,12 @@ function mergeData(buyData, soldData) {
         // });
 
         // Flood Zone Seperationg Data
-        if (buyData[bk]['IN FLOOD ZONE']) {
-            buyDataFlood[bk] = buyData[bk];
-        } else {
-            buyDataNonFlood[bk] = buyData[bk];
-        }
-
+        // if (buyData[bk]['IN FLOOD ZONE']) {
+        //     buyDataFlood[bk] = buyData[bk];
+        // } else {
+        //     buyDataNonFlood[bk] = buyData[bk];
+        // }
+         buyDataAll[bk] = buyData[bk];
 
     });
 
@@ -350,11 +358,11 @@ function mergeData(buyData, soldData) {
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
     createJSONFile(filteredBuyData, 'total');
 
-    let filteredBuyNonFloodData = _.differenceBy(buyDataNonFlood, dupArr, 'id');
-    createCSVFile(filteredBuyNonFloodData, 'total');
+    let filteredBuyAllData = _.differenceBy(buyDataAll, dupArr, 'id');
+    createCSVFile(filteredBuyAllData, 'total');
  
-    let filteredBuyDataFlood = _.differenceBy(buyDataFlood, dupArr, 'id');
-    createCSVFile(filteredBuyDataFlood , 'total-flood');
+    // let filteredBuyDataFlood = _.differenceBy(buyDataFlood, dupArr, 'id');
+    // createCSVFile(filteredBuyDataFlood , 'total-flood');
 
 
 }
