@@ -4,7 +4,7 @@ const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
 
-var county = 'hunt';
+var county = 'denton';
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
@@ -57,8 +57,9 @@ function formatSoldData(csv) {
     let orderArr = [];
 
     csv.forEach(o => {
+        // console.log(o);
         let acreSquareFeet = 43560,
-            priceArr = o[' PRICE '].replace('$', '').replace(',', '').replace(' ', '').split('.');
+            priceArr = o['PRICE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
         orderArr.push({
             'ADDRESS': o['ADDRESS'],
             'CITY': o['CITY'],
