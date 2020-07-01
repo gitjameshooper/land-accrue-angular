@@ -4,7 +4,7 @@ const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
 
-var county = 'denton';
+var county = 'grayson';
 
 function createJSONFile(propertyData, name) {
     fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
