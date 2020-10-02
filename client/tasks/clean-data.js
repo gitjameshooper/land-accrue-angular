@@ -1,92 +1,116 @@
-const d3 = require('d3')
 const fs = require('fs')
 const _ = require('lodash')
 const path = require('path')
 const { Parser } = require('json2csv')
+const csvToJson = require('csvtojson')
 
-var county = 'cooke';
 
+console.log('sync-start');
+const county = 'kaufman';
+ 
 function createJSONFile(propertyData, name) {
-    fs.writeFileSync('./src/assets/json/' + name + '.json', JSON.stringify(propertyData));
-    console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' JSON Property Data Complete');
+    return new Promise((res,rej) => {
+            console.log(name+'starting');
+         fs.writeFile('./src/assets/json/' + name + '.json', JSON.stringify(propertyData),(err) => {
+             if(err) {rej(err) 
+             }else{
+             console.log('\x1b[36m%s\x1b[0m', 'Task: Write File ' + name.toUpperCase()+'.json' + ' Complete');
+             res(propertyData);
+              }
+         });
+      
+    });
+
 }
 
 function createCSVFile(propertyData, name) {
- 
-    const fields =  [
-    "statusColor",
-    "estimatedValue",
-    "LOT ACREAGE",
-    "pricePerAcre",
-    "offer",
-    "SUBDIVISION",
-    "SITUS CITY",
-    "SITUS ZIP CODE",
-    "LATITUDE",
-    "LONGITUDE",
-    "MARKET TOTAL VALUE",
-    "MARKET IMPROVEMENT VALUE",
-    "MUNICIPALITY/TOWNSHIP",
-    "LEGAL DESCRIPTION",
-    "LEGAL LOT",
-    "IN FLOOD ZONE",
-    "SITUS STREET ADDRESS",
-    "COUNTY",
-    "SITUS STATE",
-    "LOT AREA",
-    "APN - FORMATTED",
-    // "APN - UNFORMATTED",
-    "OWNER MAILING NAME",
-    "MAILING STREET ADDRESS",
-    "MAIL CITY",
-    "MAIL STATE",
-    "MAIL ZIPZIP4",
-    "date",
-    "propertyLink"
-    ];
-     
-     
-    const json2csvParser = new Parser({ fields });
-    const csv = json2csvParser.parse(propertyData);
- 
-    fs.writeFileSync('./csv/' + county + '/' + name + '.csv', csv);
-    console.log('\x1b[36m%s\x1b[0m', 'Task: Format ' + name.toUpperCase() + ' CSV Property Data Complete');
+
+     return new Promise((res, rej) => {
+         console.log(name+'csv starting');
+        const fields =  [
+        "statusColor",
+        "estimatedValue",
+        "LOT ACREAGE",
+        "pricePerAcre",
+        "offer",
+        "SUBDIVISION",
+        "SITUS CITY",
+        "SITUS ZIP CODE",
+        "LATITUDE",
+        "LONGITUDE",
+        "MARKET TOTAL VALUE",
+        "MARKET IMPROVEMENT VALUE",
+        "MUNICIPALITY/TOWNSHIP",
+        "LEGAL DESCRIPTION",
+        "LEGAL LOT",
+        "IN FLOOD ZONE",
+        "SITUS STREET ADDRESS",
+        "COUNTY",
+        "SITUS STATE",
+        "LOT AREA",
+        "APN - FORMATTED",
+        // "APN - UNFORMATTED",
+        "OWNER MAILING NAME",
+        "MAILING STREET ADDRESS",
+        "MAIL CITY",
+        "MAIL STATE",
+        "MAIL ZIPZIP4",
+        "date",
+        "propertyLink"
+        ];
+         
+         
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(propertyData);
+
+        fs.writeFile('./csv/' + county + '/' + name + '.csv', csv, (err) => {
+
+            if(err) {
+                rej(err); 
+             }else{
+                console.log('\x1b[36m%s\x1b[0m', 'Task: Write File ' + name.toUpperCase()+'.csv' + ' Complete');
+                res(csv);
+              }
+        });
+       
+    });
 }
 
 function formatSoldData(csv) {
-    let orderArr = [];
+    return new Promise((res, rej) => {
+        let orderArr = [];
 
-    csv.forEach(o => {
-        // console.log(o);
-        let acreSquareFeet = 43560,
-            priceArr = o['PRICE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
-        orderArr.push({
-            'ADDRESS': o['ADDRESS'],
-            'CITY': o['CITY'],
-            'STATE': o['STATE OR PROVINCE'],
-            'ZIP': o['ZIP OR POSTAL CODE'],
-            'SOLD PRICE': Number(priceArr[0]),
-            'LOT AREA': Number(o['LOT SIZE']),
-            'LOT ACREAGE': Number(parseFloat(o['LOT SIZE'] / acreSquareFeet).toFixed(2)),
-            'PRICE PER ACRE': Math.round(Number(priceArr[0]) / (o['LOT SIZE'] / acreSquareFeet)),
-            'LATITUDE': o['LATITUDE'],
-            'LONGITUDE': o['LONGITUDE'],
-            'URL': o['URL (SEE http://www.redfin.com/buy-a-home/comparative-market-analysis FOR INFO ON PRICING)'],
-            'distance': 0
+        csv.forEach(o => {
+            let acreSquareFeet = 43560,
+                priceArr = o['PRICE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
+            orderArr.push({
+                'ADDRESS': o['ADDRESS'],
+                'CITY': o['CITY'],
+                'STATE': o['STATE OR PROVINCE'],
+                'ZIP': o['ZIP OR POSTAL CODE'],
+                'SOLD PRICE': Number(priceArr[0]),
+                'LOT AREA': Number(o['LOT SIZE']),
+                'LOT ACREAGE': Number(parseFloat(o['LOT SIZE'] / acreSquareFeet).toFixed(2)),
+                'PRICE PER ACRE': Math.round(Number(priceArr[0]) / (o['LOT SIZE'] / acreSquareFeet)),
+                'LATITUDE': o['LATITUDE'],
+                'LONGITUDE': o['LONGITUDE'],
+                'URL': o['URL (SEE http://www.redfin.com/buy-a-home/comparative-market-analysis FOR INFO ON PRICING)'],
+                'distance': 0
+            })
+
+
         })
-
-
-    })
-
-    return orderArr
+        res(orderArr);
+    });
 }
 
 function formatBuyData(csv) {
+    return new Promise((res, rej) => {
+
     let orderArr = [];
 
     csv.forEach(o => {
-  
-               // console.log(o);
+   
         let marketValueArr = o['MARKET TOTAL VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.'),
             marketImproveValueArr = o['MARKET IMPROVEMENT VALUE'].replace('$', '').replace(',', '').replace(' ', '').split('.');
         orderArr.push({
@@ -142,32 +166,15 @@ function formatBuyData(csv) {
 
 
     })
-
-    return orderArr
+        res(orderArr);
+    });
 }
 
 function getFormattedDate() {
-    var date = new Date();
+    let date = new Date();
      return ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + date.getFullYear();
 }
 
-function formatOfferData(csv) {
-    let orderArr = [];
-
-    csv.forEach(o => {
-
-        let offer = o[' Offer '].replace('$', '').replace(',', '').split('.');
-        orderArr.push({
-            'SITUS FULL ADDRESS': o['SITUS FULL ADDRESS'].trim(),
-            'jasonEstValue': Number(o['est value']),
-            'jasonOffer': Number(offer[0]),
-        })
-
-
-    })
-
-    return orderArr
-}
 
 function distance(lat1, lon1, lat2, lon2, unit) {
     if ((lat1 == lat2) && (lon1 == lon2)) {
@@ -189,8 +196,10 @@ function distance(lat1, lon1, lat2, lon2, unit) {
         return dist;
     }
 }
-// function mergeData(buyData, soldData, offerData) {
+
 function mergeData(buyData, soldData) {
+
+    return new Promise((res,rej) => {
     let dupArr = [],
         uniqueId = 1,
         BD = [],
@@ -200,7 +209,6 @@ function mergeData(buyData, soldData) {
     _.forEach(buyData, (bv, bk) => {
         let soldArr = [],
             totalPricePerAcre = 0;
-            // offerObj = _.find(offerData, { 'SITUS FULL ADDRESS': buyData[bk]['SITUS FULL ADDRESS'] });
             buyData[bk]['id'] = uniqueId++;
 
         // 8 miles radius from buy property - Loops through each mile adding to the sold array
@@ -329,22 +337,6 @@ function mergeData(buyData, soldData) {
             buyData[bk]['statusColor'] = 'red';
         }
 
-
-        // Remove Duplicates: Choose from the most sold data for each property
-        // _.forEach(buyData, (bv2, bk2) => {
-        //     if (buyData[bk2]['soldArr'] && buyData[bk]['MAILING STREET ADDRESS'] === buyData[bk2]['MAILING STREET ADDRESS'] && buyData[bk]['SITUS FULL ADDRESS'] !== buyData[bk2]['SITUS FULL ADDRESS']) {
-
-        //         if (buyData[bk]['soldArr'].length === buyData[bk2]['soldArr'].length) {
-        //             dupArr.push(buyData[bk]);
-        //         } else if (buyData[bk]['soldArr'].length < buyData[bk2]['soldArr'].length) {
-        //             dupArr.push(buyData[bk]);
-        //         } else if (buyData[bk]['soldArr'].length > buyData[bk2]['soldArr'].length) {
-        //             dupArr.push(buyData[bk2]);
-        //         }
-        //     }
-
-        // });
-
         // Flood Zone Seperationg Data
         // if (buyData[bk]['IN FLOOD ZONE']) {
         //     buyDataFlood[bk] = buyData[bk];
@@ -357,36 +349,39 @@ function mergeData(buyData, soldData) {
 
     // Removes Duplicate Mailing addresses filteredBuyData : buyData
     let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
-    createJSONFile(filteredBuyData, 'total');
+    // createJSONFile(filteredBuyData, 'total');
 
     let filteredBuyAllData = _.differenceBy(buyDataAll, dupArr, 'id');
-    createCSVFile(filteredBuyAllData, 'total');
+    // createCSVFile(filteredBuyAllData, 'total');
  
     // let filteredBuyDataFlood = _.differenceBy(buyDataFlood, dupArr, 'id');
     // createCSVFile(filteredBuyDataFlood , 'total-flood');
-
-
+     res([filteredBuyData, filteredBuyAllData]);
+  });
 }
 
 // Read and Write Files
-let buyCSVData = fs.readFileSync('./csv/'+county+'/buy.csv', 'utf8');
-buyCSVData = d3.csvParse(buyCSVData);
-
-let soldCSVData = fs.readFileSync('./csv/'+county+'/sold.csv', 'utf8');
-soldCSVData = d3.csvParse(soldCSVData);
-
-// let offerCSVData = fs.readFileSync('./csv/'+county+'/offer.csv', 'utf8');
-// offerCSVData = d3.csvParse(offerCSVData);
-
-createJSONFile(formatBuyData(buyCSVData), 'buy');
-createJSONFile(formatSoldData(soldCSVData), 'sold');
-// createJSONFile(formatOfferData(offerCSVData), 'offer');
 
 
-let buyJSONData = JSON.parse(fs.readFileSync('./src/assets/json/buy.json', 'utf8'));
-let soldJSONData = JSON.parse(fs.readFileSync('./src/assets/json/sold.json', 'utf8'));
-// let offerJSONData = JSON.parse(fs.readFileSync('./src/assets/json/offer.json', 'utf8'));
+ 
+async function getData() {
+
+    let buyD = await csvToJson().fromFile('./csv/'+county+'/buy.csv').then((data) => formatBuyData(data)).then((data) => {createJSONFile(data,'buy');});
+    let soldD = await csvToJson().fromFile('./csv/'+county+'/sold.csv').then((data) => formatSoldData(data)).then((data) => {createJSONFile(data,'sold');});
+    let mergeD = await mergeData(buyD, soldD);
+    let jsonFile = await createJSONFile(mergeD[0], 'total');
+    let csvFile = await createCSVFile(mergeD[1], 'total');
+}
+
+function run(){
+    return new Promise((res,rej) =>{
+        res('happy');
+    });
+}
+
+getData().then(run).then(console.log).catch(console.log)
 
 
-// mergeData(buyJSONData, soldJSONData, offerJSONData);
-mergeData(buyJSONData, soldJSONData);
+
+
+console.log('sync-end');
