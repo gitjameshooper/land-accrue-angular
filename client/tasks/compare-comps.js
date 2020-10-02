@@ -1,16 +1,12 @@
 const fs = require('fs')
 const _ = require('lodash')
-const path = require('path')
 const { Parser } = require('json2csv')
 const csvToJson = require('csvtojson')
 
-
-console.log('sync-start');
 const county = 'kaufman';
  
 function createJSONFile(propertyData, name) {
     return new Promise((res,rej) => {
-            console.log(name+'starting');
          fs.writeFile('./src/assets/json/' + name + '.json', JSON.stringify(propertyData),(err) => {
              if(err) {rej(err) 
              }else{
@@ -26,7 +22,6 @@ function createJSONFile(propertyData, name) {
 function createCSVFile(propertyData, name) {
 
      return new Promise((res, rej) => {
-         console.log(name+'csv starting');
         const fields =  [
         "statusColor",
         "estimatedValue",
@@ -60,8 +55,8 @@ function createCSVFile(propertyData, name) {
         ];
          
          
-        const json2csvParser = new Parser({ fields });
-        const csv = json2csvParser.parse(propertyData);
+        let json2csvParser = new Parser({ fields }),
+            csv = json2csvParser.parse(propertyData);
 
         fs.writeFile('./csv/' + county + '/' + name + '.csv', csv, (err) => {
 
@@ -180,19 +175,20 @@ function distance(lat1, lon1, lat2, lon2, unit) {
     if ((lat1 == lat2) && (lon1 == lon2)) {
         return 0;
     } else {
-        let radlat1 = Math.PI * lat1 / 180;
-        let radlat2 = Math.PI * lat2 / 180;
-        let theta = lon1 - lon2;
-        let radtheta = Math.PI * theta / 180;
-        let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        let radlat1 = Math.PI * lat1 / 180,
+            radlat2 = Math.PI * lat2 / 180,
+            theta = lon1 - lon2,
+            radtheta = Math.PI * theta / 180,
+            dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
         if (dist > 1) {
             dist = 1;
         }
         dist = Math.acos(dist);
         dist = dist * 180 / Math.PI;
         dist = dist * 60 * 1.1515;
-        if (unit == "K") { dist = dist * 1.609344 }
-        if (unit == "N") { dist = dist * 0.8684 }
+        if (unit == "K") { dist *= 1.609344 }
+        if (unit == "N") { dist *= 0.8684 }
+
         return dist;
     }
 }
@@ -216,29 +212,36 @@ function mergeData(buyData, soldData) {
             _.forEach(soldData, (sv, sk) => {
                 let soldProp = { ...soldData[sk]},
                     soldDistance = distance(bv['LATITUDE'], bv['LONGITUDE'], sv['LATITUDE'], sv['LONGITUDE'], 'M'),
-                    minAcre = buyData[bk]['LOT ACREAGE'] - 1,
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + 1;
-                if (buyData[bk]['LOT ACREAGE'] > 12) {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - 7;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + 7;
-                } else if (buyData[bk]['LOT ACREAGE'] > 8) {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - 4;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + 4;
-                } else if (buyData[bk]['LOT ACREAGE'] > 5) {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - 2;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + 2;
-                } else if (buyData[bk]['LOT ACREAGE'] > 3) {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - 1;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + 1;
+                    minAcre,
+                    maxAcre; 
+                    switch(true){
+                        case buyData[bk]['LOT ACREAGE'] > 12:
+                          minAcre = buyData[bk]['LOT ACREAGE'] - 7;
+                          maxAcre = buyData[bk]['LOT ACREAGE'] + 7;
+                          break;
+                        case buyData[bk]['LOT ACREAGE'] > 8:
+                          minAcre = buyData[bk]['LOT ACREAGE'] - 4;
+                          maxAcre = buyData[bk]['LOT ACREAGE'] + 4;
+                          break;
+                        case buyData[bk]['LOT ACREAGE'] > 5:
+                          minAcre = buyData[bk]['LOT ACREAGE'] - 2;
+                          maxAcre = buyData[bk]['LOT ACREAGE'] + 2;
+                          break;
+                        case buyData[bk]['LOT ACREAGE'] > 3:
+                          minAcre = buyData[bk]['LOT ACREAGE'] - 1;
+                          maxAcre = buyData[bk]['LOT ACREAGE'] + 1;
+                          break;
+                        case buyData[bk]['LOT ACREAGE'] > .50:
+                          minAcre = buyData[bk]['LOT ACREAGE'] - .50;
+                          maxAcre = buyData[bk]['LOT ACREAGE'] + .50;
+                          break;
 
-                } else if (buyData[bk]['LOT ACREAGE'] > .50) {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - .50;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + .50;
-                } else {
-                    minAcre = buyData[bk]['LOT ACREAGE'] - .25;
-                    maxAcre = buyData[bk]['LOT ACREAGE'] + .25;
-                }
-
+                        default:
+                         minAcre = buyData[bk]['LOT ACREAGE'] - .25;
+                         maxAcre = buyData[bk]['LOT ACREAGE'] + .25;
+                         break;
+                    }
+             
                 // Less than 5 sold properties on array and Less than (d) miles away and close to the same lot acreage
                 if (soldArr.length < 5 && soldDistance < v + 1 && soldDistance > v && minAcre < soldProp['LOT ACREAGE'] && maxAcre > soldProp['LOT ACREAGE']) {
 
@@ -252,9 +255,9 @@ function mergeData(buyData, soldData) {
 
 
         // Top 3 Closests by distance: Properties Price per Acre
-        let sortedDistanceSoldArr = _.sortBy(soldArr, ['distance']);
-        let totalPPADistance = 0;
-        let totalPPADistanceDivider = 0;
+        let sortedDistanceSoldArr = _.sortBy(soldArr, ['distance']),
+            totalPPADistance = 0,
+            totalPPADistanceDivider = 0;
 
 
         if (sortedDistanceSoldArr[0] && sortedDistanceSoldArr[1] && sortedDistanceSoldArr[2]) {
@@ -273,10 +276,9 @@ function mergeData(buyData, soldData) {
 
 
         // 3 middle with avg. Price per Acre
-        let sortedPPASoldArr = _.sortBy(soldArr, ['PRICE PER ACRE']);
-
-        let totalPPAMiddle = 0;
-        let totalPPAMiddleDivider = 0;
+        let sortedPPASoldArr = _.sortBy(soldArr, ['PRICE PER ACRE']),
+            totalPPAMiddle = 0,
+            totalPPAMiddleDivider = 0;
         if (sortedPPASoldArr[1] && sortedPPASoldArr[2] && sortedPPASoldArr[3]) {
             totalPPAMiddle = sortedPPASoldArr[1]['PRICE PER ACRE'] + sortedPPASoldArr[2]['PRICE PER ACRE'] + sortedPPASoldArr[3]['PRICE PER ACRE'];
             totalPPAMiddleDivider = 3;
@@ -308,10 +310,7 @@ function mergeData(buyData, soldData) {
         buyData[bk]['offer3'] = Math.floor((buyData[bk]['estValue3'] * .50) / 100) * 100;
         buyData[bk]['offerPPA'] = Math.round(buyData[bk]['offer'] / buyData[bk]['LOT ACREAGE']);
 
-        // buyData[bk]['jasonOffer'] = offerObj ? offerObj['jasonOffer'] : 0;
-        // buyData[bk]['jasonEstValue'] = offerObj ? offerObj['jasonEstValue'] : 0;
-
-
+  
         // Add status color based off the amount of sold propeties
         if (soldArr.length > 3) {
             buyData[bk]['statusColor'] = 'green';
@@ -337,51 +336,22 @@ function mergeData(buyData, soldData) {
             buyData[bk]['statusColor'] = 'red';
         }
 
-        // Flood Zone Seperationg Data
-        // if (buyData[bk]['IN FLOOD ZONE']) {
-        //     buyDataFlood[bk] = buyData[bk];
-        // } else {
-        //     buyDataNonFlood[bk] = buyData[bk];
-        // }
          buyDataAll[bk] = buyData[bk];
 
     });
-
-    // Removes Duplicate Mailing addresses filteredBuyData : buyData
-    let filteredBuyData = _.differenceBy(buyData, dupArr, 'id');
-    // createJSONFile(filteredBuyData, 'total');
-
-    let filteredBuyAllData = _.differenceBy(buyDataAll, dupArr, 'id');
-    // createCSVFile(filteredBuyAllData, 'total');
- 
-    // let filteredBuyDataFlood = _.differenceBy(buyDataFlood, dupArr, 'id');
-    // createCSVFile(filteredBuyDataFlood , 'total-flood');
-     res([filteredBuyData, filteredBuyAllData]);
+     res([_.differenceBy(buyData, dupArr, 'id'), _.differenceBy(buyDataAll, dupArr, 'id')]);
   });
 }
 
 // Read and Write Files
+async function compareComps() {
 
+    let buyD = await csvToJson().fromFile('./csv/'+county+'/buy.csv').then((data) => formatBuyData(data)).then((data) => createJSONFile(data,'buy'));
+        soldD = await csvToJson().fromFile('./csv/'+county+'/sold.csv').then((data) => formatSoldData(data)).then((data) => createJSONFile(data,'sold'));
+        mergeD = await mergeData(buyD, soldD);
+        jsonFile = await createJSONFile(mergeD[0], 'total');
+        csvFile = await createCSVFile(mergeD[1], 'total');
+}
 
  
-async function getData() {
-
-    let buyD = await csvToJson().fromFile('./csv/'+county+'/buy.csv').then((data) => formatBuyData(data)).then((data) => {createJSONFile(data,'buy');});
-    let soldD = await csvToJson().fromFile('./csv/'+county+'/sold.csv').then((data) => formatSoldData(data)).then((data) => {createJSONFile(data,'sold');});
-    let mergeD = await mergeData(buyD, soldD);
-    let jsonFile = await createJSONFile(mergeD[0], 'total');
-    let csvFile = await createCSVFile(mergeD[1], 'total');
-}
-
-function run(){
-    return new Promise((res,rej) =>{
-        res('happy');
-    });
-}
-
-getData().then(run).then(console.log).catch(console.log)
-
-
-
-
-console.log('sync-end');
+compareComps().catch(console.log)
